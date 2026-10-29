@@ -100,6 +100,30 @@ class TransactionRepositoryTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun historyViewModelShowsCardsPersistedWhileHistoryIsOpen() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val cardDao = InMemoryCardDao()
+            val repository = TransactionRepository(cardDao, InMemoryScanDao(), InMemoryTransactionDao())
+            val viewModel = HistoryScreenViewModel(repository)
+            viewModel.onAction(HistoryScreenAction.OnInit)
+            runCurrent()
+
+            repository.saveCardReadResult(
+                CardReadResult("new-card", listOf(transaction(day = 2, balance = 860)))
+            )
+            advanceUntilIdle()
+
+            assertEquals("new-card", viewModel.state.value.cards.single().card.idm)
+            assertEquals(null, viewModel.state.value.cards.single().balance)
+            assertEquals(null, viewModel.state.value.error)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private fun transaction(day: Int, balance: Int) = Transaction(
         fixedHeader = "01 02 03 04",
         timestamp = LocalDateTime(2024, 7, day, 10, 30),

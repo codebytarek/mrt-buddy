@@ -34,6 +34,12 @@ class HistoryScreenViewModel(
 
     private var observeJob: Job? = null
 
+    init {
+        // Start observing persisted cards with the ViewModel, not only after the screen's
+        // first composition. The Room flow remains active while the user changes tabs.
+        observeCards()
+    }
+
     fun onAction(action: HistoryScreenAction) {
         when (action) {
             HistoryScreenAction.OnInit,
@@ -64,7 +70,9 @@ class HistoryScreenViewModel(
     }
 
     private fun observeCards() {
-        observeJob?.cancel()
+        // Re-entering History should not cancel a healthy collector. Restart only after
+        // a completed/failed collection or an explicit retry.
+        if (observeJob?.isActive == true) return
         observeJob = viewModelScope.launch {
             transactionRepository.observeCardsWithLatestBalance()
                 .onStart {

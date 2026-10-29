@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -54,8 +55,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -90,7 +93,6 @@ import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.Transparent
-import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.utils.TimeUtils
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
@@ -147,7 +149,26 @@ fun CardItem(
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .scale(animatedScale)
             .rotate(animatedRotation)
-            .glassSurface(cardShape)
+            // The branded card tint below is already translucent. A second full glass
+            // fill under it created a visible inset rectangle, so keep only the glass
+            // rim and soft lift on this surface.
+            .shadow(
+                elevation = 7.dp,
+                shape = cardShape,
+                ambientColor = Color.Black.copy(alpha = if (isDarkTheme) 0.20f else 0.07f),
+                spotColor = Color.Black.copy(alpha = if (isDarkTheme) 0.24f else 0.06f)
+            )
+            .clip(cardShape)
+            .border(
+                width = 0.8.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color.White.copy(alpha = if (isDarkTheme) 0.40f else 0.52f),
+                        Color.White.copy(alpha = if (isDarkTheme) 0.18f else 0.26f)
+                    )
+                ),
+                shape = cardShape
+            )
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {

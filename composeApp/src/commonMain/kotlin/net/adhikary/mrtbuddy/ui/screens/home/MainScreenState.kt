@@ -16,4 +16,9 @@ data class MainScreenState(
     val error: String? = null,
     val currentLanguage: String = "en",
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM
-)
+) {
+    /** Recent Activity is only relevant to a successful card scan shown on this screen. */
+    val hasVisibleCurrentScanHistory: Boolean
+        get() = hasCurrentScanResult && cardIdm != null && cardState is CardState.Balance &&
+            transactionWithAmount.isNotEmpty()
+}

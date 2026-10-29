@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -107,6 +108,7 @@ fun MoreScreen(
     onNavigateToStationMap: () -> Unit,
     onNavigateToLicenses: () -> Unit,
     modifier: Modifier = Modifier,
+    bottomContentPadding: Dp = 0.dp,
     viewModel: MoreScreenViewModel = koinViewModel()
 ) {
     val uriHandler = LocalUriHandler.current
@@ -137,7 +139,12 @@ fun MoreScreen(
     // Modern LazyColumn implementation for better performance
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            top = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp + bottomContentPadding
+        ),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Animated Header

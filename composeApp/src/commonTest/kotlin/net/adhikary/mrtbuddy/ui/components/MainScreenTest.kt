@@ -8,6 +8,7 @@ import net.adhikary.mrtbuddy.model.CardReadResult
 import net.adhikary.mrtbuddy.model.Transaction
 import net.adhikary.mrtbuddy.ui.screens.home.MainScreenState
 import net.adhikary.mrtbuddy.ui.screens.home.withScanResult
+import net.adhikary.mrtbuddy.ui.screens.home.withoutCurrentScanResult
 import net.adhikary.mrtbuddy.ui.screens.home.Screen
 import net.adhikary.mrtbuddy.model.TransactionType
 
@@ -38,6 +39,24 @@ class MainScreenTest {
         assertEquals(listOf(newest, oldest), state.transaction)
         assertEquals(-40, state.transactionWithAmount[0].amount)
         assertEquals(null, state.transactionWithAmount[1].amount)
+    }
+
+    @Test
+    fun recentActivityIsHiddenUntilTheCurrentCardScanHasFinished() {
+        val scanned = MainScreenState().withScanResult(
+            CardReadResult("card-id", listOf(transaction(day = 2, balance = 960)))
+        )
+
+        assertTrue(!scanned.hasVisibleCurrentScanHistory)
+        val balanceVisible = scanned.copy(cardState = net.adhikary.mrtbuddy.model.CardState.Balance(960))
+        assertTrue(balanceVisible.hasVisibleCurrentScanHistory)
+
+        val waitingForNextTap = balanceVisible.withoutCurrentScanResult(
+            net.adhikary.mrtbuddy.model.CardState.WaitingForTap
+        )
+        assertTrue(!waitingForNextTap.hasVisibleCurrentScanHistory)
+        assertTrue(waitingForNextTap.transaction.isEmpty())
+        assertTrue(waitingForNextTap.transactionWithAmount.isEmpty())
     }
 
     @Test

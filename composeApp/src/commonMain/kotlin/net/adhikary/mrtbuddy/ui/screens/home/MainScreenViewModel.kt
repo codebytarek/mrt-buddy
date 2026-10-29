@@ -72,7 +72,10 @@ class MainScreenViewModel(
 
             is MainScreenAction.UpdateCardState -> {
                 _state.update {
-                    it.copy(cardState = action.newState)
+                    when (action.newState) {
+                        CardState.WaitingForTap, CardState.Reading -> it.withoutCurrentScanResult(action.newState)
+                        else -> it.copy(cardState = action.newState)
+                    }
                 }
             }
 
@@ -121,5 +124,15 @@ internal fun MainScreenState.withScanResult(
     transaction = result.transactions,
     transactionWithAmount = transactionsWithAmount,
     hasCurrentScanResult = true,
+    error = null
+)
+
+internal fun MainScreenState.withoutCurrentScanResult(newCardState: CardState): MainScreenState = copy(
+    cardState = newCardState,
+    cardIdm = null,
+    cardName = null,
+    transaction = emptyList(),
+    transactionWithAmount = emptyList(),
+    hasCurrentScanResult = false,
     error = null
 )

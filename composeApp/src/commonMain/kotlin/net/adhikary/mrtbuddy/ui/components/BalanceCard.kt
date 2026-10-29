@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 10196)
+Total output lines: 961
+
 package net.adhikary.mrtbuddy.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -84,7 +87,6 @@ import mrtbuddy.composeapp.generated.resources.nfcAnimationDescription
 import mrtbuddy.composeapp.generated.resources.errorDescription
 import mrtbuddy.composeapp.generated.resources.noNfcDescription
 import mrtbuddy.composeapp.generated.resources.nfcDisabledDescription
-import mrtbuddy.composeapp.generated.resources.unknownScanError
 import io.github.alexzhirkevich.compottie.LottieAnimation
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.LottieConstants
@@ -103,6 +105,7 @@ import mrtbuddy.composeapp.generated.resources.readingCard
 import mrtbuddy.composeapp.generated.resources.requiredNfc
 import mrtbuddy.composeapp.generated.resources.rescan
 import mrtbuddy.composeapp.generated.resources.scanFailed
+import net.adhikary.mrtbuddy.localizedNfcErrorMessage
 import mrtbuddy.composeapp.generated.resources.tap
 import mrtbuddy.composeapp.generated.resources.tapRescanToStart
 import mrtbuddy.composeapp.generated.resources.tips
@@ -435,23 +438,7 @@ private fun NfcReadingAnimation(size: Dp = 172.dp) {
     LaunchedEffect(foreground, surface) {
         fun rgba(color: Color) = "[${color.red},${color.green},${color.blue},1]"
         animationJson = runCatching {
-            Res.readBytes("files/nfc-reading-universal.json")
-                .decodeToString()
-                // Use the same supplied motion on every background. Tint its mark with the
-                // active theme and blend the center into the current screen surface.
-                .replace("\"k\":[0.2392,0.2431,0,1]", "\"k\":${rgba(foreground)}")
-                .replace("\"k\":[1,1,1,1]", "\"k\":${rgba(surface)}")
-        }.getOrNull()
-    }
-    val json = animationJson
-    Box(
-        modifier = Modifier
-            .size(size)
-            .drawBehind {
-                listOf(pulseOne, pulseTwo).forEach { progress ->
-                    val radius = this.size.minDimension * (0.16f + 0.35f * progress)
-                    drawCircle(
-                        color = accent.copy(alpha = 0.30f * (1f - progress)),
+            Res.re…196 tokens truncated…ccent.copy(alpha = 0.30f * (1f - progress)),
                         radius = radius,
                         style = Stroke(width = 1.5.dp.toPx())
                     )
@@ -642,11 +629,7 @@ private fun ModernWaitingContent() {
 
 @Composable
 private fun ModernErrorContent(message: String) {
-    val localizedMessage = if (message == "Unknown error occurred") {
-        stringResource(Res.string.unknownScanError)
-    } else {
-        message
-    }
+    val localizedMessage = localizedNfcErrorMessage(message)
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,

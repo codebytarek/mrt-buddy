@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -61,7 +62,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun FareCalculatorScreen(
     modifier: Modifier = Modifier,
     viewModel: FareCalculatorViewModel = koinViewModel(),
-    cardState: CardState
+    cardState: CardState,
+    bottomContentPadding: Dp = 0.dp
 ) {
     val uiState by viewModel.state.collectAsState()
     var headerVisible by remember { mutableStateOf(false) }
@@ -114,7 +116,12 @@ fun FareCalculatorScreen(
     ) {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(
+                start = 12.dp,
+                top = 12.dp,
+                end = 12.dp,
+                bottom = 12.dp + bottomContentPadding
+            ),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             // Modern gradient header with compact status chip

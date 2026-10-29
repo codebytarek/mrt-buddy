@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.cancel
@@ -84,6 +85,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HistoryScreen(
     modifier: Modifier = Modifier,
     onCardSelected: (String) -> Unit,
+    refreshKey: Boolean = true,
+    bottomContentPadding: Dp = 0.dp,
     viewModel: HistoryScreenViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.state.collectAsState().value
@@ -96,8 +99,8 @@ fun HistoryScreen(
     val renameSuccessText = stringResource(Res.string.cardRenamed)
     val deleteSuccessText = stringResource(Res.string.cardDeleted)
 
-    LaunchedEffect(viewModel) {
-        viewModel.onAction(HistoryScreenAction.OnInit)
+    LaunchedEffect(viewModel, refreshKey) {
+        if (refreshKey) viewModel.onAction(HistoryScreenAction.OnInit)
     }
 
     LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, renameSuccessText, deleteSuccessText) {
@@ -374,7 +377,10 @@ fun HistoryScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 16.dp),
+                        contentPadding = PaddingValues(
+                            top = 16.dp,
+                            bottom = 16.dp + bottomContentPadding
+                        ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Header with cards count

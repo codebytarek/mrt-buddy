@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import androidx.compose.ui.Alignment
 import net.adhikary.mrtbuddy.getPlatform
+import net.adhikary.mrtbuddy.localizedNfcErrorMessage
 import net.adhikary.mrtbuddy.managers.RescanManager
 import net.adhikary.mrtbuddy.model.CardState
 import net.adhikary.mrtbuddy.nfc.service.StationService
@@ -479,7 +480,7 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
 
                 is CardState.Error -> {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = cs.message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                        Text(text = localizedNfcErrorMessage(cs.message), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
 

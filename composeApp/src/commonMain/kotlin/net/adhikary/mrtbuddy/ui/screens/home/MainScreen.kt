@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +45,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -74,6 +77,7 @@ import net.adhikary.mrtbuddy.ui.components.CalculatorIcon
 import net.adhikary.mrtbuddy.ui.components.CardIcon
 import net.adhikary.mrtbuddy.ui.components.HistoryIcon
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
@@ -117,7 +121,7 @@ fun MainScreen(
             backStackEntry?.destination?.route ?: Screen.Home.name
         )
         var selectedCardIdm by remember { mutableStateOf<String?>(null) }
-        val hasTransactions = uiState.transaction.isNotEmpty()
+        val hasTransactions = uiState.hasVisibleCurrentScanHistory
 
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
         Scaffold(
@@ -127,6 +131,14 @@ fun MainScreen(
                 ModernNavigationBar(currentScreen, navController)
             }
         ) { paddingValues ->
+            val layoutDirection = LocalLayoutDirection.current
+            val pagePadding = PaddingValues(
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                top = paddingValues.calculateTopPadding(),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+                bottom = 0.dp
+            )
+            val scrollBehindNavigationPadding = paddingValues.calculateBottomPadding()
             NavHost(
                 navController = navController,
                 startDestination = Screen.Home.name,
@@ -136,14 +148,16 @@ fun MainScreen(
                     ModernHomeScreen(
                         uiState = uiState,
                         hasTransactions = hasTransactions,
-                        paddingValues = paddingValues
+                        paddingValues = pagePadding,
+                        bottomContentPadding = scrollBehindNavigationPadding
                     )
                 }
 
                 composable(route = Screen.Calculator.name) {
                     FareCalculatorScreen(
                         cardState = uiState.cardState,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(pagePadding),
+                        bottomContentPadding = scrollBehindNavigationPadding
                     )
                 }
 
@@ -155,7 +169,8 @@ fun MainScreen(
                         onNavigateToLicenses = {
                             navController.navigate(Screen.Licenses.name)
                         },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(pagePadding),
+                        bottomContentPadding = scrollBehindNavigationPadding
                     )
                 }
 
@@ -165,7 +180,9 @@ fun MainScreen(
                             selectedCardIdm = cardIdm
                             navController.navigate(Screen.TransactionList.name)
                         },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(pagePadding),
+                        refreshKey = currentScreen == Screen.History,
+                        bottomContentPadding = scrollBehindNavigationPadding
                     )
                 }
 
@@ -186,7 +203,7 @@ fun MainScreen(
                         onBack = {
                             navController.navigateUp()
                         },
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(pagePadding)
                     )
                 }
 
@@ -195,6 +212,7 @@ fun MainScreen(
                         onBack = {
                             navController.navigateUp()
                         },
+                        modifier = Modifier.padding(pagePadding),
                         paddingValues = paddingValues
                     )
                 }
@@ -208,26 +226,44 @@ private fun ModernNavigationBar(
     currentScreen: Screen,
     navController: NavHostController
 ) {
-    val shape = RoundedCornerShape(36.dp)
+    val shape = RoundedCornerShape(42.dp)
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 14.dp, vertical = 8.dp)
-            .glassSurface(shape, bottomEdgeAlpha = 0.02f)
+            .navigationGlassSurface(shape)
     ) {
-        // A soft specular sweep gives the floating bar a glass rim/highlight instead of a flat tint.
+        // Broad reflection and shaded lower edge create the frosted, rounded glass lens.
         Box(
             Modifier
                 .matchParentSize()
                 .clip(shape)
                 .background(
                     Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0f to Color.White.copy(alpha = if (dark) 0.30f else 0.44f),
+                            0.12f to Color.White.copy(alpha = if (dark) 0.12f else 0.20f),
+                            0.42f to Color.Transparent,
+                            0.78f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = if (dark) 0.15f else 0.035f)
+                        )
+                    )
+                )
+        )
+        Box(
+            Modifier
+                .matchParentSize()
+                .padding(1.dp)
+                .clip(RoundedCornerShape(41.dp))
+                .background(
+                    Brush.horizontalGradient(
                         listOf(
-                            Color.White.copy(alpha = if (dark) 0.26f else 0.34f),
+                            Color.White.copy(alpha = if (dark) 0.10f else 0.22f),
                             Color.Transparent,
-                            Color.Transparent
+                            Color.Transparent,
+                            Color.White.copy(alpha = if (dark) 0.07f else 0.16f)
                         )
                     )
                 )
@@ -329,6 +365,7 @@ private fun ModernHomeScreen(
     uiState: MainScreenState,
     hasTransactions: Boolean,
     paddingValues: PaddingValues,
+    bottomContentPadding: androidx.compose.ui.unit.Dp,
 
 ) {
     val validTransactions = remember(uiState.transactionWithAmount) {
@@ -458,6 +495,7 @@ private fun ModernHomeScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp),
+                    contentPadding = PaddingValues(bottom = bottomContentPadding),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(
@@ -473,7 +511,10 @@ private fun ModernHomeScreen(
                     }
                 }
             }
-        } else if (uiState.hasCurrentScanResult && uiState.cardIdm != null) {
+        } else if (
+            uiState.hasCurrentScanResult && uiState.cardIdm != null &&
+            uiState.cardState is net.adhikary.mrtbuddy.model.CardState.Balance
+        ) {
             Card(
                 modifier = Modifier.fillMaxWidth().weight(1f).glassSurface(RoundedCornerShape(18.dp)),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
