@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import net.adhikary.mrtbuddy.data.TransactionEntity
 
 @Dao
@@ -19,6 +20,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE cardIdm = :cardIdm ORDER BY `order` DESC")
     suspend fun getTransactionsByCardIdm(cardIdm: String): List<TransactionEntity>
+
+    @Query("SELECT * FROM transactions WHERE cardIdm = :cardIdm ORDER BY `order` DESC")
+    fun observeTransactionsByCardIdm(cardIdm: String): Flow<List<TransactionEntity>>
 
     @Query("SELECT MAX(`order`) FROM transactions")
     suspend fun getLastOrder(): Int?

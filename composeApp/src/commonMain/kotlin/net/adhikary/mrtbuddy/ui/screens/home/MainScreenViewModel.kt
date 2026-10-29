@@ -26,6 +26,11 @@ class MainScreenViewModel(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
+    companion object {
+        const val CARD_IDENTIFIER_ERROR = "CARD_IDENTIFIER_ERROR"
+        const val SAVE_HISTORY_ERROR = "SAVE_HISTORY_ERROR"
+    }
+
     private var autoSaveEnabled: Boolean = true
 
     private val _state: MutableStateFlow<MainScreenState> = MutableStateFlow(initialState)
@@ -74,7 +79,7 @@ class MainScreenViewModel(
             is MainScreenAction.UpdateCardReadResult -> {
                 val result = action.cardReadResult
                 if (result.idm.isBlank()) {
-                    _state.update { it.copy(error = "The card scan did not provide a card identifier.") }
+                    _state.update { it.copy(error = CARD_IDENTIFIER_ERROR) }
                     return
                 }
                 val mappedTransactions = mapTransactionsWithAmount(result.transactions)
@@ -87,12 +92,11 @@ class MainScreenViewModel(
                         if (autoSaveEnabled) transactionRepository.saveCardReadResult(result)
                         val card = transactionRepository.getCardByIdm(result.idm)
                         _state.update { it.copy(cardName = card?.name) }
-                    } catch (e: Exception) {
-                        val message = e.message ?: "Could not save or load this card's history."
-                        _state.update { it.copy(error = message) }
-                        _events.send(MainScreenEvent.Error(message))
-                    } finally {
-                        _state.update { it.copy(historyRevision = it.historyRevision + 1) }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (_: Exception) {
+                        _state.update { it.copy(error = SAVE_HISTORY_ERROR) }
+                        _events.send(MainScreenEvent.Error(SAVE_HISTORY_ERROR))
                     }
                 }
             }

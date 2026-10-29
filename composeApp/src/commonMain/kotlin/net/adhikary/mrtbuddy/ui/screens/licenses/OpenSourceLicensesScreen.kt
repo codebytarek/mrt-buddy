@@ -28,6 +28,9 @@ import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
 import mrtbuddy.composeapp.generated.resources.Res
+import mrtbuddy.composeapp.generated.resources.openSourceLicenses
+import mrtbuddy.composeapp.generated.resources.back
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 
@@ -78,12 +81,12 @@ fun OpenSourceLicensesScreen(
     ) {
         item {
             TopAppBar(
-                title = { Text("Open Source Licenses") },
+                title = { Text(stringResource(Res.string.openSourceLicenses)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(Res.string.back)
                         )
                     }
                 },

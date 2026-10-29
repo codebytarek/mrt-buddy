@@ -36,6 +36,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,9 +57,25 @@ import mrtbuddy.composeapp.generated.resources.cancel
 import mrtbuddy.composeapp.generated.resources.delete
 import mrtbuddy.composeapp.generated.resources.deleteCard
 import mrtbuddy.composeapp.generated.resources.deleteCardConfirm
+import mrtbuddy.composeapp.generated.resources.deleteCardHistoryWarning
+import mrtbuddy.composeapp.generated.resources.loadingCards
+import mrtbuddy.composeapp.generated.resources.loadingCardsDescription
 import mrtbuddy.composeapp.generated.resources.noCardsFound
 import mrtbuddy.composeapp.generated.resources.payments
 import mrtbuddy.composeapp.generated.resources.scanCardPrompt
+import mrtbuddy.composeapp.generated.resources.somethingWentWrong
+import mrtbuddy.composeapp.generated.resources.tryAgain
+import mrtbuddy.composeapp.generated.resources.yourCards
+import mrtbuddy.composeapp.generated.resources.cardsCount
+import mrtbuddy.composeapp.generated.resources.lowBalanceCount
+import mrtbuddy.composeapp.generated.resources.lowBalanceWarning
+import mrtbuddy.composeapp.generated.resources.historyLoadError
+import mrtbuddy.composeapp.generated.resources.renameCardError
+import mrtbuddy.composeapp.generated.resources.deleteCardError
+import mrtbuddy.composeapp.generated.resources.cardRenamed
+import mrtbuddy.composeapp.generated.resources.cardDeleted
+import net.adhikary.mrtbuddy.translateNumber
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -66,14 +84,44 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HistoryScreen(
     modifier: Modifier = Modifier,
     onCardSelected: (String) -> Unit,
-    refreshKey: Int = 0,
     viewModel: HistoryScreenViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.state.collectAsState().value
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(refreshKey) {
+    val loadErrorText = stringResource(Res.string.historyLoadError)
+    val renameErrorText = stringResource(Res.string.renameCardError)
+    val deleteErrorText = stringResource(Res.string.deleteCardError)
+    val renameSuccessText = stringResource(Res.string.cardRenamed)
+    val deleteSuccessText = stringResource(Res.string.cardDeleted)
+
+    LaunchedEffect(viewModel) {
         viewModel.onAction(HistoryScreenAction.OnInit)
+    }
+
+    LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, renameSuccessText, deleteSuccessText) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is HistoryScreenEvent.Error -> {
+                    val message = when (event.error) {
+                        HistoryScreenViewModel.LOAD_ERROR -> loadErrorText
+                        HistoryScreenViewModel.RENAME_ERROR -> renameErrorText
+                        HistoryScreenViewModel.DELETE_ERROR -> deleteErrorText
+                        else -> event.error
+                    }
+                    snackbarHostState.showSnackbar(message)
+                }
+                HistoryScreenEvent.RenameSuccess -> snackbarHostState.showSnackbar(renameSuccessText)
+                HistoryScreenEvent.DeleteSuccess -> snackbarHostState.showSnackbar(deleteSuccessText)
+                is HistoryScreenEvent.ShowRenameDialog -> Unit
+            }
+        }
+    }
+
+    val displayedError = when (uiState.error) {
+        HistoryScreenViewModel.LOAD_ERROR -> loadErrorText
+        else -> uiState.error.orEmpty()
     }
 
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -99,7 +147,10 @@ fun HistoryScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
+            modifier = Modifier.glassSurface(RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            tonalElevation = 0.dp,
             title = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -125,7 +176,7 @@ fun HistoryScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "This action cannot be undone. All transaction history for this card will be permanently removed.",
+                        text = stringResource(Res.string.deleteCardHistoryWarning),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -162,11 +213,13 @@ fun HistoryScreen(
         modifier = Modifier.fillMaxSize().then(modifier),
         color = androidx.compose.ui.graphics.Color.Transparent
     ) {
-        AnimatedVisibility(
+        Box(Modifier.fillMaxSize()) {
+          AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
             visible = true,
             enter = fadeIn(animationSpec = tween(300)),
             exit = fadeOut(animationSpec = tween(300))
-        ) {
+          ) {
             when {
                 uiState.isLoading -> {
                     // Enhanced loading state
@@ -175,10 +228,10 @@ fun HistoryScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Card(
-                            modifier = Modifier.padding(32.dp),
+                            modifier = Modifier.padding(32.dp).glassSurface(RoundedCornerShape(20.dp)),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
+                                containerColor = androidx.compose.ui.graphics.Color.Transparent
                             ),
                             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
                         ) {
@@ -193,13 +246,13 @@ fun HistoryScreen(
                                     modifier = Modifier.size(48.dp)
                                 )
                                 Text(
-                                    text = "Loading your cards...",
+                                    text = stringResource(Res.string.loadingCards),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
-                                    text = "Please wait while we fetch your card information",
+                                    text = stringResource(Res.string.loadingCardsDescription),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                     textAlign = TextAlign.Center
@@ -209,17 +262,17 @@ fun HistoryScreen(
                     }
                 }
 
-                uiState.error != null -> {
+                uiState.error != null && uiState.cards.isEmpty() -> {
                     // Enhanced error state
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Card(
-                            modifier = Modifier.padding(24.dp),
+                            modifier = Modifier.padding(24.dp).glassSurface(RoundedCornerShape(20.dp)),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+                                containerColor = androidx.compose.ui.graphics.Color.Transparent
                             ),
                             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
                         ) {
@@ -235,13 +288,13 @@ fun HistoryScreen(
                                     modifier = Modifier.size(48.dp)
                                 )
                                 Text(
-                                    text = "Something went wrong",
+                                    text = stringResource(Res.string.somethingWentWrong),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.error
                                 )
                                 Text(
-                                    text = uiState.error,
+                                    text = displayedError,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                     textAlign = TextAlign.Center
@@ -255,7 +308,7 @@ fun HistoryScreen(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Try Again", fontWeight = FontWeight.SemiBold)
+                                    Text(stringResource(Res.string.tryAgain), fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -329,10 +382,11 @@ fun HistoryScreen(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                shape = RoundedCornerShape(10.dp),
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .glassSurface(RoundedCornerShape(16.dp)),
+                                shape = RoundedCornerShape(16.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                    containerColor = androidx.compose.ui.graphics.Color.Transparent
                                 )
                             ) {
                                 Row(
@@ -344,12 +398,12 @@ fun HistoryScreen(
                                 ) {
                                     Column {
                                         Text(
-                                            text = "Your Cards",
+                                            text = stringResource(Res.string.yourCards),
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            text = "${uiState.cards.size} card${if (uiState.cards.size != 1) "s" else ""} found",
+                                            text = stringResource(Res.string.cardsCount, translateNumber(uiState.cards.size)),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                         )
@@ -364,12 +418,12 @@ fun HistoryScreen(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Warning,
-                                                contentDescription = "Low balance warning",
+                                                contentDescription = stringResource(Res.string.lowBalanceWarning),
                                                 tint = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
-                                                text = "$lowBalanceCount low balance",
+                                                text = stringResource(Res.string.lowBalanceCount, translateNumber(lowBalanceCount)),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.error,
                                                 fontWeight = FontWeight.Medium
@@ -413,6 +467,11 @@ fun HistoryScreen(
                     }
                 }
             }
+          }
+          SnackbarHost(
+              hostState = snackbarHostState,
+              modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+          )
         }
     }
 }

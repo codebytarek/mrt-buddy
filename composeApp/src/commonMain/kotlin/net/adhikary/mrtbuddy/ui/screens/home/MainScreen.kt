@@ -64,6 +64,10 @@ import mrtbuddy.composeapp.generated.resources.more
 import mrtbuddy.composeapp.generated.resources.openSourceLicenses
 import mrtbuddy.composeapp.generated.resources.stationMap
 import mrtbuddy.composeapp.generated.resources.transactions
+import mrtbuddy.composeapp.generated.resources.welcomeBack
+import mrtbuddy.composeapp.generated.resources.cardIdentifierError
+import mrtbuddy.composeapp.generated.resources.saveHistoryError
+import mrtbuddy.composeapp.generated.resources.appName
 import net.adhikary.mrtbuddy.ui.components.AppsIcon
 import net.adhikary.mrtbuddy.ui.components.BalanceCard
 import net.adhikary.mrtbuddy.ui.components.CalculatorIcon
@@ -120,9 +124,7 @@ fun MainScreen(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             bottomBar = {
-                if (currentScreen != Screen.StationMap) {
-                    ModernNavigationBar(currentScreen, navController)
-                }
+                ModernNavigationBar(currentScreen, navController)
             }
         ) { paddingValues ->
             NavHost(
@@ -163,8 +165,7 @@ fun MainScreen(
                             selectedCardIdm = cardIdm
                             navController.navigate(Screen.TransactionList.name)
                         },
-                        modifier = Modifier.padding(paddingValues),
-                        refreshKey = uiState.historyRevision
+                        modifier = Modifier.padding(paddingValues)
                     )
                 }
 
@@ -185,6 +186,7 @@ fun MainScreen(
                         onBack = {
                             navController.navigateUp()
                         },
+                        modifier = Modifier.padding(paddingValues)
                     )
                 }
 
@@ -213,17 +215,7 @@ private fun ModernNavigationBar(
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 14.dp, vertical = 8.dp)
-            .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color.White.copy(alpha = if (dark) 0.42f else 0.54f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = if (dark) 0.18f else 0.16f),
-                        Color.Transparent
-                    )
-                ),
-                shape
-            )
+            .glassSurface(shape, bottomEdgeAlpha = 0.02f)
     ) {
         // A soft specular sweep gives the floating bar a glass rim/highlight instead of a flat tint.
         Box(
@@ -269,7 +261,9 @@ private fun ModernNavigationBar(
             GlassNavigationItem(
                 modifier = Modifier.weight(1f),
                 title = stringResource(Res.string.more),
-                selected = currentScreen == Screen.More,
+                selected = currentScreen == Screen.More ||
+                    currentScreen == Screen.StationMap ||
+                    currentScreen == Screen.Licenses,
                 icon = { AppsIcon() },
                 onClick = { navigateToScreen(navController, Screen.More) }
             )
@@ -355,14 +349,14 @@ private fun ModernHomeScreen(
         ) {
             Column {
                 Text(
-                    text = "Welcome back",
+                    text = stringResource(Res.string.welcomeBack),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Light,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 )
                 Text(
-                    text = "MRT Buddy",
+                    text = stringResource(Res.string.appName),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -395,7 +389,7 @@ private fun ModernHomeScreen(
                         )
                     )
                     Text(
-                        text = "Transactions",
+                        text = stringResource(Res.string.transactions),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -412,14 +406,19 @@ private fun ModernHomeScreen(
         )
 
         uiState.error?.let { errorMessage ->
+            val localizedError = when (errorMessage) {
+                MainScreenViewModel.CARD_IDENTIFIER_ERROR -> stringResource(Res.string.cardIdentifierError)
+                MainScreenViewModel.SAVE_HISTORY_ERROR -> stringResource(Res.string.saveHistoryError)
+                else -> errorMessage
+            }
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.75f)
-                )
+                modifier = Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = errorMessage,
+                    text = localizedError,
                     modifier = Modifier.padding(12.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -441,27 +440,6 @@ private fun ModernHomeScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    ),
-                    modifier = Modifier.clickable {
-                        // Handle click here
-
-                    }
-                ) {
-//                    Text(
-//                        text = "View All",
-//                        modifier = Modifier
-//                            .padding(horizontal = 12.dp, vertical = 6.dp),
-//                        style = MaterialTheme.typography.labelMedium.copy(
-//                            fontWeight = FontWeight.Medium,
-//                            color = MaterialTheme.colorScheme.primary
-//                        )
-//
-//                    )
-                }
             }
 
             // Scrollable Recent Activity Section - Only this part scrolls

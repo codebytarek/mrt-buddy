@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.collectLatest
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.aboutHeader
+import mrtbuddy.composeapp.generated.resources.copyright
 import mrtbuddy.composeapp.generated.resources.autoSaveCardDetails
 import mrtbuddy.composeapp.generated.resources.autoSaveCardDetailsDescription
 import mrtbuddy.composeapp.generated.resources.card
@@ -135,16 +136,7 @@ fun MoreScreen(
 
     // Modern LazyColumn implementation for better performance
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.78f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.62f)
-                    )
-                )
-            ),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -611,10 +603,10 @@ private fun AnimatedSupportSection(
 @Composable
 private fun EnhancedFooterSection() {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = Color.Transparent
         )
     ) {
         Column(
@@ -640,7 +632,7 @@ private fun EnhancedFooterSection() {
             )
 
             Text(
-                text = "Copyright © 2024 Aniruddha Adhikary.",
+                text = stringResource(Res.string.copyright),
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.stationMap
+import mrtbuddy.composeapp.generated.resources.back
 import net.adhikary.mrtbuddy.Language
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
@@ -43,7 +44,7 @@ fun StationMapScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(Res.string.back)
                     )
                 }
             },
@@ -60,7 +61,7 @@ fun StationMapScreen(
             } else {
                 Res.getUri("files/map_bn.webp")
             },
-            contentDescription = "Station Map",
+            contentDescription = stringResource(Res.string.stationMap),
             contentScale = ContentScale.FillHeight,
             filterQuality = FilterQuality.High,
             scrollBar = null

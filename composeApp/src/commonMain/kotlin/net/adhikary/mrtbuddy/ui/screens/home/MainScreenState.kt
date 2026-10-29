@@ -13,7 +13,6 @@ data class MainScreenState(
     val transaction: List<Transaction> = emptyList(),
     val transactionWithAmount: List<TransactionWithAmount> = emptyList(),
     val hasCurrentScanResult: Boolean = false,
-    val historyRevision: Int = 0,
     val error: String? = null,
     val currentLanguage: String = "en",
     val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM

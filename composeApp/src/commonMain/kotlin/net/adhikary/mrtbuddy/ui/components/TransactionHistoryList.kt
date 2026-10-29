@@ -68,7 +68,12 @@ fun TransactionHistoryList(transactions: List<TransactionWithAmount>) {
             
             val validTransactions = transactions
 
-            items(validTransactions) { transactionWithAmount ->
+            items(
+                items = validTransactions,
+                key = { item ->
+                    "${item.transaction.timestamp}_${item.transaction.fromStation}_${item.transaction.toStation}_${item.transaction.balance}_${item.transaction.fixedHeader}"
+                }
+            ) { transactionWithAmount ->
                 TransactionItem(
                     type = TransactionType.fromHeader(transactionWithAmount.transaction.fixedHeader),
                     date = transactionWithAmount.transaction.timestamp,

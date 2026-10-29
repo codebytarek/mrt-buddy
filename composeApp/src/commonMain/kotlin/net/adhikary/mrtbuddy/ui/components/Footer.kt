@@ -8,6 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import mrtbuddy.composeapp.generated.resources.Res
+import mrtbuddy.composeapp.generated.resources.builtWith
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun Footer(
@@ -15,7 +18,7 @@ fun Footer(
 ) {
     val uriHandler = LocalUriHandler.current
     return Text(
-        text = "Built with ❤️ by Ani and friends",
+        text = stringResource(Res.string.builtWith),
         modifier = modifier
             .clickable {
                 uriHandler.openUri("https://mrtbuddy.com/contributors.html")

@@ -13,19 +13,17 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 
-/** A shared frosted-glass treatment for app surfaces (without blurring their readable content). */
-fun Modifier.glassSurface(shape: Shape): Modifier = composed {
+/** Shared translucent glass styling for information surfaces and floating controls. */
+fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    // Keep light-mode glass translucent so the ambient backdrop remains visible instead of
-    // turning every surface into a white card with a hard outline.
-    val topHighlight = Color.White.copy(alpha = if (dark) 0.25f else 0.46f)
-    // Keep the backdrop visible through dark surfaces; a strong surface tint reads as a solid card.
-    val middleTint = MaterialTheme.colorScheme.surface.copy(alpha = if (dark) 0.24f else 0.38f)
-    val lowerTint = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dark) 0.30f else 0.24f)
-    val edge = Color.White.copy(alpha = if (dark) 0.48f else 0.30f)
+    val topHighlight = Color.White.copy(alpha = if (dark) 0.30f else 0.42f)
+    val middleTint = MaterialTheme.colorScheme.surface.copy(alpha = if (dark) 0.15f else 0.18f)
+    val lowerTint = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dark) 0.24f else 0.14f)
+    val edge = Color.White.copy(alpha = if (dark) 0.50f else 0.48f)
+    val edgeBottom = Color.White.copy(alpha = bottomEdgeAlpha ?: if (dark) 0.10f else 0.24f)
     this
         .shadow(
-            elevation = if (dark) 14f.dp else 7f.dp,
+            elevation = if (dark) 12f.dp else 8f.dp,
             shape = shape,
             ambientColor = Color.Black.copy(alpha = if (dark) 0.24f else 0.10f),
             spotColor = Color.Black.copy(alpha = if (dark) 0.30f else 0.08f)
@@ -36,8 +34,14 @@ fun Modifier.glassSurface(shape: Shape): Modifier = composed {
             shape
         )
         .border(
-            width = if (dark) 0.8f.dp else 0.5f.dp,
-            brush = Brush.verticalGradient(listOf(edge, Color.White.copy(alpha = if (dark) 0.10f else 0.10f))),
+            width = if (dark) 0.8f.dp else 0.7f.dp,
+            brush = Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0f to edge,
+                    0.72f to Color.White.copy(alpha = if (dark) 0.20f else 0.28f),
+                    1f to edgeBottom
+                )
+            ),
             shape = shape
         )
 }

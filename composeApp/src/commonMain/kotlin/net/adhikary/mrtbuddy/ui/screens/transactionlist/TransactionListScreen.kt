@@ -70,15 +70,28 @@ import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toLocalDateTime
 import mrtbuddy.composeapp.generated.resources.Res
-import mrtbuddy.composeapp.generated.resources.added
+import mrtbuddy.composeapp.generated.resources.amount
 import mrtbuddy.composeapp.generated.resources.balance
+import mrtbuddy.composeapp.generated.resources.back
+import mrtbuddy.composeapp.generated.resources.balanceWithAmount
+import mrtbuddy.composeapp.generated.resources.addedAccessibility
+import mrtbuddy.composeapp.generated.resources.spentAccessibility
 import mrtbuddy.composeapp.generated.resources.journeys
+import mrtbuddy.composeapp.generated.resources.loadingTransactions
+import mrtbuddy.composeapp.generated.resources.loadingTransactionsDescription
+import mrtbuddy.composeapp.generated.resources.historyLoadError
 import mrtbuddy.composeapp.generated.resources.noTransactionsFound
+import mrtbuddy.composeapp.generated.resources.notAvailable
+import mrtbuddy.composeapp.generated.resources.quickTip
 import mrtbuddy.composeapp.generated.resources.recharge
+import mrtbuddy.composeapp.generated.resources.recharges
 import mrtbuddy.composeapp.generated.resources.spent
-import mrtbuddy.composeapp.generated.resources.topup
+import mrtbuddy.composeapp.generated.resources.somethingWentWrong
 import mrtbuddy.composeapp.generated.resources.transactionSummary
+import mrtbuddy.composeapp.generated.resources.transactionsCount
 import mrtbuddy.composeapp.generated.resources.transactionsAppearPrompt
+import mrtbuddy.composeapp.generated.resources.transactionsEmptyTip
+import mrtbuddy.composeapp.generated.resources.tryAgain
 import mrtbuddy.composeapp.generated.resources.unnamedCard
 import net.adhikary.mrtbuddy.data.TransactionEntityWithAmount
 import net.adhikary.mrtbuddy.model.TransactionType
@@ -132,7 +145,7 @@ fun TransactionListScreen(
                         )
                         if (uiState.balance != null) {
                             Text(
-                                text = "Balance: ৳ ${translateNumber(uiState.balance)}",
+                                text = stringResource(Res.string.balanceWithAmount, translateNumber(uiState.balance)),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
@@ -143,7 +156,7 @@ fun TransactionListScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(Res.string.back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -167,10 +180,10 @@ fun TransactionListScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Card(
-                                modifier = Modifier.padding(32.dp),
+                            modifier = Modifier.padding(32.dp).glassSurface(RoundedCornerShape(20.dp)),
                                 shape = RoundedCornerShape(20.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
+                                    containerColor = Color.Transparent
                                 ),
                                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp)
                             ) {
@@ -185,13 +198,13 @@ fun TransactionListScreen(
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Text(
-                                        text = "Loading transactions...",
+                                    text = stringResource(Res.string.loadingTransactions),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Medium
                                     )
                                     Text(
-                                        text = "Please wait while we fetch your transaction history",
+                                        text = stringResource(Res.string.loadingTransactionsDescription),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                         textAlign = TextAlign.Center
@@ -208,7 +221,7 @@ fun TransactionListScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Card(
-                                modifier = Modifier.padding(24.dp),
+                            modifier = Modifier.padding(24.dp).glassSurface(RoundedCornerShape(20.dp)),
                                 shape = RoundedCornerShape(20.dp),
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.errorContainer.copy(
@@ -229,20 +242,20 @@ fun TransactionListScreen(
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Text(
-                                        text = "Something went wrong",
+                                    text = stringResource(Res.string.somethingWentWrong),
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.error
                                     )
                                     Text(
-                                        text = uiState.error,
+                                        text = stringResource(Res.string.historyLoadError),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                         textAlign = TextAlign.Center
                                     )
                                     FilledTonalButton(
                                         onClick = {
-                                            // Add refresh functionality if available in viewModel
+                                            viewModel.refresh()
                                         }
                                     ) {
                                         Icon(
@@ -251,7 +264,7 @@ fun TransactionListScreen(
                                             modifier = Modifier.size(18.dp)
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Try Again", fontWeight = FontWeight.SemiBold)
+                                        Text(stringResource(Res.string.tryAgain), fontWeight = FontWeight.SemiBold)
                                     }
                                 }
                             }
@@ -319,7 +332,7 @@ fun TransactionListScreen(
 
                                 // Quick tips card
                                 Card(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(16.dp)),
                                     shape = RoundedCornerShape(16.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(
@@ -332,13 +345,13 @@ fun TransactionListScreen(
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         Text(
-                                            text = "💡 Quick Tip",
+                                            text = stringResource(Res.string.quickTip),
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         Text(
-                                            text = "Start using your card for MRT journeys or balance top-ups. All your transactions will appear here with detailed information.",
+                                            text = stringResource(Res.string.transactionsEmptyTip),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                         )
@@ -455,7 +468,7 @@ fun TransactionSummaryCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${transactions.size} transaction${if (transactions.size != 1) "s" else ""}",
+                    text = stringResource(Res.string.transactionsCount, translateNumber(transactions.size)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -473,13 +486,13 @@ fun TransactionSummaryCard(
                 )
                 SummaryItem(
                     icon = Icons.Default.MonetizationOn,
-                    label = stringResource(Res.string.topup),
+                    label = stringResource(Res.string.recharges),
                     value = translateNumber(rechargeTransactions.size),
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
                     icon = Icons.Default.TrendingUp,
-                    label = stringResource(Res.string.added),
+                    label = stringResource(Res.string.amount),
                     value = "৳${translateNumber(totalAdded)}",
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
@@ -556,7 +569,7 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
     val amountText = if (trxEntity.amount != null) {
         "৳ ${translateNumber(trxEntity.amount)}"
     } else {
-        "N/A"
+        stringResource(Res.string.notAvailable)
     }
 
     val tz = TimestampService.getDefaultTimezone()
@@ -680,7 +693,7 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     if (isPositive) {
                         Icon(
                             imageVector = Icons.Default.TrendingUp,
-                            contentDescription = "Added",
+                            contentDescription = stringResource(Res.string.addedAccessibility),
                             modifier = Modifier.size(16.dp),
                             tint = amountColor
                         )
@@ -693,7 +706,7 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     } else if (trxEntity.amount != null) {
                         Icon(
                             imageVector = Icons.Default.TrendingDown,
-                            contentDescription = "Spent",
+                            contentDescription = stringResource(Res.string.spentAccessibility),
                             modifier = Modifier.size(16.dp),
                             tint = amountColor
                         )

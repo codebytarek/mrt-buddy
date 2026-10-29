@@ -8,10 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +59,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -70,8 +69,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.balance
+import mrtbuddy.composeapp.generated.resources.balanceLabel
 import mrtbuddy.composeapp.generated.resources.cardId
+import mrtbuddy.composeapp.generated.resources.cardIdLabel
+import mrtbuddy.composeapp.generated.resources.contactless
+import mrtbuddy.composeapp.generated.resources.critical
+import mrtbuddy.composeapp.generated.resources.deleteCard
+import mrtbuddy.composeapp.generated.resources.hideCardId
+import mrtbuddy.composeapp.generated.resources.lastScanLabel
 import mrtbuddy.composeapp.generated.resources.lastScan
+import mrtbuddy.composeapp.generated.resources.low
+import mrtbuddy.composeapp.generated.resources.moreOptions
+import mrtbuddy.composeapp.generated.resources.neverScanned
+import mrtbuddy.composeapp.generated.resources.renameCard
+import mrtbuddy.composeapp.generated.resources.showCardId
 import mrtbuddy.composeapp.generated.resources.unnamedCard
 import net.adhikary.mrtbuddy.data.CardEntity
 import net.adhikary.mrtbuddy.ui.theme.DarkMRTPass
@@ -79,8 +90,7 @@ import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.Transparent
-import net.adhikary.mrtbuddy.ui.theme.white80
-import net.adhikary.mrtbuddy.ui.theme.white98
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.utils.TimeUtils
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
@@ -93,7 +103,7 @@ fun CardItem(
     onRenameClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val isRapidPass = isRapidPassIdm(card.idm)
     var showDropdown by remember { mutableStateOf(false) }
     var isIdVisible by remember { mutableStateOf(false) }
@@ -116,34 +126,6 @@ fun CardItem(
         if (isDarkTheme) DarkMRTPass else LightMRTPass
     }
 
-    // Enhanced card gradient with better color transitions
-    val cardGradient = if (isRapidPass) {
-        // Rapid Pass: navy blue, deep sky blue, light sky blue, red
-        Brush.linearGradient(
-            colors = listOf(
-                Color(0xFF001F3F), // navy blue
-                Color(0xFF1877F2), // deep sky blue
-                Color(0xFF56CCF2), // light sky blue
-                Color(0xFFFF3B30)  // red
-            ),
-            start = Offset(0f, 0f),
-            end = Offset(1200f, 600f)
-        )
-    } else {
-        // MRT Pass: deep green, teal, light sky blue, red
-        Brush.linearGradient(
-            colors = listOf(
-                Color(0xFF006400), // deep green
-                Color(0xFF009688), // teal
-                Color(0xFF56CCF2), // light sky blue
-                Color(0xFFFF3B30)  // red
-            ),
-            start = Offset(0f, 0f),
-            end = Offset(1200f, 600f)
-        )
-    }
-
-
     // Smooth animations
     val animatedScale by animateFloatAsState(
         targetValue = if (isPressed) 0.97f else 1f,
@@ -157,19 +139,15 @@ fun CardItem(
         label = "card_rotation"
     )
 
-    // Transit card design with MRT Buddy branding - Fixed height
+    // Transit card design with branded tint over the shared frosted glass treatment.
+    val cardShape = RoundedCornerShape(20.dp)
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentSize()
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .scale(animatedScale)
             .rotate(animatedRotation)
-            .border(
-                1.dp,
-                Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.76f), Color.White.copy(alpha = 0.18f))),
-                RoundedCornerShape(20.dp)
-            )
+            .glassSurface(cardShape)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -183,8 +161,8 @@ fun CardItem(
                     })
             },
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 16.dp,
-            pressedElevation = 8.dp
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
         ),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
@@ -195,7 +173,7 @@ fun CardItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .background(cardColor)
+                .background(cardColor.copy(alpha = 0.68f))
         ) {
             Box(
                 Modifier
@@ -235,7 +213,7 @@ fun CardItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options",
+                            contentDescription = stringResource(Res.string.moreOptions),
                             tint = Color.White,
                             modifier = Modifier.size(16.dp)
                         )
@@ -247,7 +225,7 @@ fun CardItem(
                     onDismissRequest = { showDropdown = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Rename Card") },
+                        text = { Text(stringResource(Res.string.renameCard)) },
                         leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
                         onClick = {
                             showDropdown = false
@@ -255,7 +233,7 @@ fun CardItem(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Delete Card", color = MaterialTheme.colorScheme.error) },
+                        text = { Text(stringResource(Res.string.deleteCard), color = MaterialTheme.colorScheme.error) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Delete,
@@ -310,7 +288,7 @@ fun CardItem(
                                     color = Color.Red
                                 ) {
                                     Text(
-                                        text = "CRITICAL",
+                                        text = stringResource(Res.string.critical),
                                         style = MaterialTheme.typography.labelSmall.copy(
                                             fontWeight = FontWeight.Bold,
                                             letterSpacing = 0.5.sp
@@ -360,7 +338,7 @@ fun CardItem(
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = "BALANCE",
+                                text = stringResource(Res.string.balanceLabel),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Medium,
                                     letterSpacing = 1.sp,
@@ -373,7 +351,7 @@ fun CardItem(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "৳ $balance",
+                                    text = "৳ ${net.adhikary.mrtbuddy.translateNumber(balance)}",
                                     style = MaterialTheme.typography.headlineLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 26.sp,
@@ -393,7 +371,7 @@ fun CardItem(
                                         color = if (isVeryLowBalance) Color.Red else Color.Yellow
                                     ) {
                                         Text(
-                                            text = if (isVeryLowBalance) "CRITICAL" else "LOW",
+                                            text = stringResource(if (isVeryLowBalance) Res.string.critical else Res.string.low),
                                             style = MaterialTheme.typography.labelSmall.copy(
                                                 fontWeight = FontWeight.Bold,
                                                 letterSpacing = 0.5.sp
@@ -417,7 +395,7 @@ fun CardItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Contactless,
-                            contentDescription = "Contactless",
+                            contentDescription = stringResource(Res.string.contactless),
                             tint = Color.White,
                             modifier = Modifier
                                 .size(30.dp)
@@ -444,7 +422,7 @@ fun CardItem(
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
-                            text = "CARD ID",
+                            text = stringResource(Res.string.cardIdLabel),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Medium,
                                 letterSpacing = 1.sp,
@@ -479,7 +457,7 @@ fun CardItem(
                         ) {
                             Icon(
                                 imageVector = if (isIdVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = if (isIdVisible) "Hide ID" else "Show ID",
+                                contentDescription = stringResource(if (isIdVisible) Res.string.hideCardId else Res.string.showCardId),
                                 tint = Color.White.copy(alpha = 0.8f),
                                 modifier = Modifier.size(14.dp)
                             )
@@ -500,7 +478,7 @@ fun CardItem(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "LAST SCAN",
+                                text = stringResource(Res.string.lastScanLabel),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Medium,
                                     letterSpacing = 1.sp,
@@ -528,7 +506,7 @@ fun CardItem(
                             text = if (card.lastScanTime != null) {
                                 TimeUtils.getTimeAgoString(card.lastScanTime)
                             } else {
-                                "Never scanned"
+                                stringResource(Res.string.neverScanned)
                             },
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Medium

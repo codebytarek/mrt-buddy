@@ -37,6 +37,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.appcompat)
             implementation(libs.koin.android)
         }
         commonMain.dependencies {
@@ -156,15 +157,15 @@ licenseReport {
 
 tasks.register("processLicenseReport") {
     dependsOn("generateLicenseReport")
-    
+
     doLast {
         val reportPath = file("build/reports/dependency-license/open-source-licenses.md")
         val processedPath = file("build/reports/dependency-license/processed-open-source-licenses.md")
-        
+
         if (!reportPath.exists()) {
             throw GradleException("License report not found at $reportPath")
         }
-        
+
         val content = reportPath.readText()
         val processedContent = content.replace(
             Regex("_\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} [A-Z]+_"),
@@ -176,7 +177,7 @@ tasks.register("processLicenseReport") {
 
 tasks.register("copyLicenseReportToAssets") {
     dependsOn("processLicenseReport")
-    
+
     doLast {
         val processedPath = file("build/reports/dependency-license/processed-open-source-licenses.md")
         val commonAssetsPath = file("src/commonMain/composeResources/files")

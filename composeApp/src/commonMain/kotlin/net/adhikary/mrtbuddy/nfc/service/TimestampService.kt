@@ -1,7 +1,6 @@
 package net.adhikary.mrtbuddy.nfc.service
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.intl.Locale
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -23,11 +22,9 @@ object TimestampService {
         return "$day $month $year, ${getHour(dateTime.hour)}$minutes ${getAmPm(dateTime.hour)}"
     }
 
+    @Composable
     fun getAmPm(hour: Int): String {
-        if (Locale.current.language == "bn") {
-            return if (hour < 12) "এএম" else "পিএম"
-        }
-        return if (hour < 12) "AM" else "PM"
+        return stringResource(if (hour < 12) Res.string.am else Res.string.pm)
     }
 
     fun getHour(hour: Int): String {
@@ -54,7 +51,7 @@ object TimestampService {
             10 -> stringResource(Res.string.oct)
             11 -> stringResource(Res.string.nov)
             12 -> stringResource(Res.string.dec)
-            else -> "Unknown"
+            else -> stringResource(Res.string.unknown)
         }
     }
 

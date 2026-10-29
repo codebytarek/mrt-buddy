@@ -36,6 +36,14 @@ import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.cancel
 import mrtbuddy.composeapp.generated.resources.rename
 import mrtbuddy.composeapp.generated.resources.renameCard
+import mrtbuddy.composeapp.generated.resources.renameCardDescription
+import mrtbuddy.composeapp.generated.resources.cardNamePlaceholder
+import mrtbuddy.composeapp.generated.resources.cardNameEmptyError
+import mrtbuddy.composeapp.generated.resources.cardNameTooLongError
+import mrtbuddy.composeapp.generated.resources.cardName
+import mrtbuddy.composeapp.generated.resources.charactersCount
+import net.adhikary.mrtbuddy.translateNumber
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -46,7 +54,7 @@ fun RenameDialog(
 ) {
     var newName by remember { mutableStateOf(currentName ?: "") }
     var isError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var errorKey by remember { mutableStateOf<String?>(null) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -55,17 +63,17 @@ fun RenameDialog(
         return when {
             name.isBlank() -> {
                 isError = true
-                errorMessage = "Card name cannot be empty"
+                errorKey = "empty"
                 false
             }
             name.length > 30 -> {
                 isError = true
-                errorMessage = "Card name must be 30 characters or less"
+                errorKey = "too_long"
                 false
             }
             else -> {
                 isError = false
-                errorMessage = ""
+                errorKey = null
                 true
             }
         }
@@ -77,7 +85,10 @@ fun RenameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = Modifier.glassSurface(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        tonalElevation = 0.dp,
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -102,7 +113,7 @@ fun RenameDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Give your card a memorable name to easily identify it among your collection.",
+                    text = stringResource(Res.string.renameCardDescription),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
@@ -117,10 +128,10 @@ fun RenameDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
-                    label = { Text("Card Name") },
+                    label = { Text(stringResource(Res.string.cardName)) },
                     placeholder = {
                         Text(
-                            "e.g. Home Card, Office Card, Personal",
+                            stringResource(Res.string.cardNamePlaceholder),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     },
@@ -138,11 +149,17 @@ fun RenameDialog(
                         }
                     ),
                     singleLine = true,
-                    isError = isError,
+                    isError = errorKey != null,
                     supportingText = if (isError) {
-                        { Text(errorMessage, color = MaterialTheme.colorScheme.error) }
+                        {
+                            val errorText = stringResource(
+                                if (errorKey == "empty") Res.string.cardNameEmptyError
+                                else Res.string.cardNameTooLongError
+                            )
+                            Text(errorText, color = MaterialTheme.colorScheme.error)
+                        }
                     } else {
-                        { Text("${newName.length}/30 characters") }
+                        { Text(stringResource(Res.string.charactersCount, translateNumber(newName.length))) }
                     },
                     shape = RoundedCornerShape(12.dp)
                 )

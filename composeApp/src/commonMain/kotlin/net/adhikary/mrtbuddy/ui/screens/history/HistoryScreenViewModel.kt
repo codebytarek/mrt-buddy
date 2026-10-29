@@ -2,11 +2,15 @@ package net.adhikary.mrtbuddy.ui.screens.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,71 +20,85 @@ class HistoryScreenViewModel(
     private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
-    private val _state: MutableStateFlow<HistoryScreenState> =
-        MutableStateFlow(HistoryScreenState())
+    companion object {
+        const val LOAD_ERROR = "history_load_failed"
+        const val RENAME_ERROR = "history_rename_failed"
+        const val DELETE_ERROR = "history_delete_failed"
+    }
+
+    private val _state = MutableStateFlow(HistoryScreenState())
     val state: StateFlow<HistoryScreenState> get() = _state.asStateFlow()
 
     private val _events: Channel<HistoryScreenEvent> = Channel(Channel.BUFFERED)
     val events: Flow<HistoryScreenEvent> get() = _events.receiveAsFlow()
 
+    private var observeJob: Job? = null
+
     fun onAction(action: HistoryScreenAction) {
         when (action) {
-            is HistoryScreenAction.OnInit -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(isLoading = true) }
-                    try {
-                        val cards = transactionRepository.getAllCards()
-                        val cardsWithBalance = cards.map { card ->
-                            val balance = transactionRepository.getLatestBalanceByCardIdm(card.idm)
-                            CardWithBalance(card, balance)
-                        }
-                        _state.update { it.copy(isLoading = false, cards = cardsWithBalance) }
-                    } catch (e: Exception) {
-                        _state.update { it.copy(isLoading = false, error = e.message) }
-                        _events.send(HistoryScreenEvent.Error(e.message ?: "Unknown Error"))
-                    }
+            HistoryScreenAction.OnInit,
+            HistoryScreenAction.OnCardAdded -> observeCards()
+
+            is HistoryScreenAction.RenameCard -> viewModelScope.launch {
+                try {
+                    transactionRepository.renameCard(action.cardIdm, action.newName)
+                    _events.send(HistoryScreenEvent.RenameSuccess)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    _events.send(HistoryScreenEvent.Error(RENAME_ERROR))
                 }
             }
 
-            is HistoryScreenAction.OnCardAdded -> {
-                viewModelScope.launch {
-                    onAction(HistoryScreenAction.OnInit)
+            is HistoryScreenAction.DeleteCard -> viewModelScope.launch {
+                try {
+                    transactionRepository.deleteCard(action.cardIdm)
+                    _events.send(HistoryScreenEvent.DeleteSuccess)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    _events.send(HistoryScreenEvent.Error(DELETE_ERROR))
                 }
             }
+        }
+    }
 
-            is HistoryScreenAction.RenameCard -> {
-                viewModelScope.launch {
-                    try {
-                        transactionRepository.renameCard(action.cardIdm, action.newName)
-                        _events.send(HistoryScreenEvent.RenameSuccess)
-                        // Refresh the list
-                        onAction(HistoryScreenAction.OnInit)
-                    } catch (e: Exception) {
-                        _events.send(
-                            HistoryScreenEvent.Error(
-                                e.message ?: "Failed to rename card"
-                            )
+    private fun observeCards() {
+        observeJob?.cancel()
+        observeJob = viewModelScope.launch {
+            transactionRepository.observeCardsWithLatestBalance()
+                .onStart {
+                    _state.update {
+                        it.copy(
+                            isLoading = it.cards.isEmpty(),
+                            isRefreshing = it.cards.isNotEmpty(),
+                            error = null
                         )
                     }
                 }
-            }
-
-            is HistoryScreenAction.DeleteCard -> {
-                viewModelScope.launch {
-                    try {
-                        transactionRepository.deleteCard(action.cardIdm)
-                        _events.send(HistoryScreenEvent.DeleteSuccess)
-                        // Refresh the list
-                        onAction(HistoryScreenAction.OnInit)
-                    } catch (e: Exception) {
-                        _events.send(
-                            HistoryScreenEvent.Error(
-                                e.message ?: "Failed to delete card"
-                            )
+                .catch { error ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            error = LOAD_ERROR
+                        )
+                    }
+                    _events.send(HistoryScreenEvent.Error(LOAD_ERROR))
+                }
+                .collect { records ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isRefreshing = false,
+                            cards = records.map { record ->
+                                CardWithBalance(record.card, record.balance)
+                            },
+                            error = null,
+                            lastUpdated = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
                         )
                     }
                 }
-            }
         }
     }
 }

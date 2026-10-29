@@ -21,6 +21,7 @@ import mrtbuddy.composeapp.generated.resources.topup
 import mrtbuddy.composeapp.generated.resources.uttaraCenter
 import mrtbuddy.composeapp.generated.resources.uttaraNorth
 import mrtbuddy.composeapp.generated.resources.uttaraSouth
+import mrtbuddy.composeapp.generated.resources.unknownStation
 import org.jetbrains.compose.resources.stringResource
 
 object StationService {
@@ -70,7 +71,13 @@ object StationService {
             "Uttara Center" -> stringResource(Res.string.uttaraCenter)
             "Uttara North" -> stringResource(Res.string.uttaraNorth)
             "Recharge" -> stringResource(Res.string.recharge)
-            else -> "" // Default to English if no match is found
+            else -> {
+                val unknownPrefix = "Unknown Station ("
+                val code = stationName.takeIf { it.startsWith(unknownPrefix) }
+                    ?.removePrefix(unknownPrefix)
+                    ?.removeSuffix(")")
+                if (code == null) stationName else stringResource(Res.string.unknownStation, code)
+            }
         }
     }
 }

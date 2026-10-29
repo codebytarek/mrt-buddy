@@ -1,15 +1,18 @@
 package net.adhikary.mrtbuddy
 
 import java.text.DecimalFormat
-import java.text.NumberFormat
 import java.util.Locale
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 actual fun changeLang(lang: String) {
-    val locale = Locale(lang)
+    val languageTag = when (lang.substringBefore('-').lowercase()) {
+        "bn" -> "bn"
+        else -> "en"
+    }
+    val locale = Locale.forLanguageTag(languageTag)
     Locale.setDefault(locale)
-    val configuration = android.content.res.Configuration()
-    configuration.setLocale(locale)
-    android.content.res.Resources.getSystem().updateConfiguration(configuration, null)
+    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
 }
 
 actual fun translateNumber(number: Int): String {

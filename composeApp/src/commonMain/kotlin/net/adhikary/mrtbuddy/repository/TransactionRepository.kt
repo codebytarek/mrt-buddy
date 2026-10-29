@@ -1,11 +1,15 @@
 package net.adhikary.mrtbuddy.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import net.adhikary.mrtbuddy.dao.CardDao
 import net.adhikary.mrtbuddy.dao.ScanDao
 import net.adhikary.mrtbuddy.dao.TransactionDao
 import net.adhikary.mrtbuddy.data.CardEntity
+import net.adhikary.mrtbuddy.data.CardEntityWithBalance
+import net.adhikary.mrtbuddy.data.CardTransactionHistory
 import net.adhikary.mrtbuddy.data.ScanEntity
 import net.adhikary.mrtbuddy.data.TransactionEntity
 import net.adhikary.mrtbuddy.data.TransactionEntityWithAmount
@@ -61,19 +65,28 @@ class TransactionRepository(
         return cardDao.getAllCards()
     }
 
+    fun observeCardsWithLatestBalance(): Flow<List<CardEntityWithBalance>> =
+        cardDao.observeCardsWithLatestBalance()
+
     suspend fun getTransactionsByCardIdm(cardIdm: String): List<TransactionEntityWithAmount> {
         val transactions = transactionDao.getTransactionsByCardIdm(cardIdm)
 
         val sortedTransactions = transactions.sortedByDescending { it.order }
-        return sortedTransactions.mapIndexed { index, transaction ->
-            val amount = if (index + 1 < sortedTransactions.size) {
-                transaction.balance - sortedTransactions[index + 1].balance
-            } else {
-                null
-            }
-            TransactionEntityWithAmount(transactionEntity = transaction, amount = amount)
-        }
+        return withAmounts(sortedTransactions)
     }
+
+    fun observeTransactionHistory(cardIdm: String): Flow<CardTransactionHistory> =
+        combine(
+            transactionDao.observeTransactionsByCardIdm(cardIdm),
+            cardDao.observeCardByIdm(cardIdm)
+        ) { transactions, card ->
+            val sortedTransactions = transactions.sortedByDescending { it.order }
+            CardTransactionHistory(
+                transactions = withAmounts(sortedTransactions),
+                balance = sortedTransactions.firstOrNull()?.balance,
+                cardName = card?.name
+            )
+        }
 
     suspend fun getLatestBalanceByCardIdm(cardIdm: String): Int? {
         return transactionDao.getLatestTransactionByCardIdm(cardIdm)?.balance
@@ -87,5 +100,14 @@ class TransactionRepository(
         cardDao.deleteCard(cardIdm)
         scanDao.deleteScansByCardIdm(cardIdm)
         transactionDao.deleteTransactionsByCardIdm(cardIdm)
+    }
+
+    private fun withAmounts(
+        transactions: List<TransactionEntity>
+    ): List<TransactionEntityWithAmount> = transactions.mapIndexed { index, transaction ->
+        val amount = transactions.getOrNull(index + 1)?.let { older ->
+            transaction.balance - older.balance
+        }
+        TransactionEntityWithAmount(transactionEntity = transaction, amount = amount)
     }
 }

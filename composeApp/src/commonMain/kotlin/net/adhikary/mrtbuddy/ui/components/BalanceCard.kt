@@ -77,6 +77,14 @@ import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningText
 import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningTitle
 import mrtbuddy.composeapp.generated.resources.hold
 import mrtbuddy.composeapp.generated.resources.keepCardSteady
+import mrtbuddy.composeapp.generated.resources.rapidPassCard
+import mrtbuddy.composeapp.generated.resources.mrtPassCard
+import mrtbuddy.composeapp.generated.resources.scanningProgress
+import mrtbuddy.composeapp.generated.resources.nfcAnimationDescription
+import mrtbuddy.composeapp.generated.resources.errorDescription
+import mrtbuddy.composeapp.generated.resources.noNfcDescription
+import mrtbuddy.composeapp.generated.resources.nfcDisabledDescription
+import mrtbuddy.composeapp.generated.resources.unknownScanError
 import io.github.alexzhirkevich.compottie.LottieAnimation
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.LottieConstants
@@ -205,7 +213,7 @@ fun BalanceCard(
                                     color = Color.White
                                 )
                                 Text(
-                                    text = if (isRapidPass) "Rapid Pass Card" else "MRT Pass Card",
+                                    text = stringResource(if (isRapidPass) Res.string.rapidPassCard else Res.string.mrtPassCard),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.White.copy(alpha = 0.8f)
                                 )
@@ -370,8 +378,9 @@ private fun ModernBalanceContent(
         when {
             amount <= 20 -> {
                 Card(
+                    modifier = Modifier.glassSurface(RoundedCornerShape(16.dp)),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.34f)
                     ),
                     shape = RoundedCornerShape(16.dp),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
@@ -398,44 +407,6 @@ private fun ModernBalanceContent(
                 }
             }
 
-            amount <= 70 -> {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = (if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L)
-                            .copy(alpha = 0.2f)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    /*Text(
-                        text = "💡 ${stringResource(Res.string.normalLowBalanceText)}",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                    )*/
-                }
-            }
-
-            else -> {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    /*Text(
-                        text = "✅ ${stringResource(Res.string.normalBalanceText)}",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                    )*/
-                }
-            }
         }
     }
 }
@@ -443,6 +414,7 @@ private fun ModernBalanceContent(
 @Composable
 @OptIn(ExperimentalResourceApi::class)
 private fun NfcReadingAnimation(size: Dp = 172.dp) {
+    val animationDescription = stringResource(Res.string.nfcAnimationDescription)
     val foreground = MaterialTheme.colorScheme.onSurface
     val surface = MaterialTheme.colorScheme.surface
     val accent = MaterialTheme.colorScheme.primary
@@ -485,7 +457,7 @@ private fun NfcReadingAnimation(size: Dp = 172.dp) {
                     )
                 }
             }
-            .semantics { contentDescription = "NFC card scanning animation" },
+            .semantics { contentDescription = animationDescription },
         contentAlignment = Alignment.Center
     ) {
         if (json == null) {
@@ -545,13 +517,14 @@ private fun ModernReadingContent() {
 
         // Progress indicator
         Card(
+            modifier = Modifier.glassSurface(RoundedCornerShape(12.dp)),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                text = "⚡ Scanning in progress...",
+                text = stringResource(Res.string.scanningProgress),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium
                 ),
@@ -624,9 +597,10 @@ private fun ModernWaitingContent() {
         Card(
             modifier = Modifier
                 .wrapContentSize()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .glassSurface(RoundedCornerShape(16.dp)),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.14f)
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -668,6 +642,11 @@ private fun ModernWaitingContent() {
 
 @Composable
 private fun ModernErrorContent(message: String) {
+    val localizedMessage = if (message == "Unknown error occurred") {
+        stringResource(Res.string.unknownScanError)
+    } else {
+        message
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -689,7 +668,7 @@ private fun ModernErrorContent(message: String) {
         ) {
             Icon(
                 imageVector = Icons.Default.Error,
-                contentDescription = "Error",
+                contentDescription = stringResource(Res.string.errorDescription),
                 modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -709,13 +688,14 @@ private fun ModernErrorContent(message: String) {
             )
 
             Card(
+                modifier = Modifier.glassSurface(RoundedCornerShape(16.dp)),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.14f)
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = message,
+                text = localizedMessage,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
@@ -771,7 +751,7 @@ private fun ModernNoNfcSupportContent() {
         ) {
             Icon(
                 imageVector = Icons.Default.NearMe,
-                contentDescription = "No NFC",
+                contentDescription = stringResource(Res.string.noNfcDescription),
                 modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -791,8 +771,9 @@ private fun ModernNoNfcSupportContent() {
             )
 
             Card(
+                modifier = Modifier.glassSurface(RoundedCornerShape(16.dp)),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.14f)
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -809,8 +790,9 @@ private fun ModernNoNfcSupportContent() {
 
         // Device compatibility information
         Card(
+            modifier = Modifier.glassSurface(RoundedCornerShape(16.dp)),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f)
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -861,7 +843,7 @@ private fun ModernNfcDisabledContent() {
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
-                contentDescription = "NFC Disabled",
+                contentDescription = stringResource(Res.string.nfcDisabledDescription),
                 modifier = Modifier.size(50.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -921,7 +903,8 @@ private fun ModernNfcDisabledContent() {
         // Enhanced help card with step-by-step guide
         Card(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .glassSurface(RoundedCornerShape(16.dp)),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
             ),

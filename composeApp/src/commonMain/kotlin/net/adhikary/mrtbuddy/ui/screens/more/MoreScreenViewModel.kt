@@ -64,9 +64,9 @@ class MoreScreenViewModel(
             is MoreScreenAction.SetLanguage -> {
                 viewModelScope.launch {
                     try {
-                        changeLang(action.language)
                         settingsRepository.setLanguage(action.language)
                         _state.value = _state.value.copy(currentLanguage = action.language)
+                        changeLang(action.language)
                     } catch (e: Exception) {
                         _events.send(MoreScreenEvent.Error(e.message ?: "Failed to change language"))
                     }
