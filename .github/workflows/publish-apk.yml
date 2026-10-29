@@ -29,7 +29,7 @@ jobs:
         run: |
           sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$sdkmanager" --channel=3 --licenses || true
-          "$sdkmanager" --channel=3 "platform-tools" "platforms;android-37" "build-tools;37.0.0"
+          "$sdkmanager" --channel=3 "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Build installable debug APK
         run: |
