@@ -82,6 +82,26 @@ val darkScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
     )
 
+/** Opaque information surfaces; translucency is reserved for floating navigation. */
+fun glassColorScheme(base: androidx.compose.material3.ColorScheme): androidx.compose.material3.ColorScheme =
+    base.copy(
+        primary = base.primary.copy(alpha = 0.94f),
+        secondary = base.secondary.copy(alpha = 0.92f),
+        tertiary = base.tertiary.copy(alpha = 0.92f),
+        error = base.error.copy(alpha = 0.94f),
+        surface = base.surface,
+        surfaceVariant = base.surfaceVariant,
+        surfaceContainerLowest = base.surfaceContainerLowest,
+        surfaceContainerLow = base.surfaceContainerLow,
+        surfaceContainer = base.surfaceContainer,
+        surfaceContainerHigh = base.surfaceContainerHigh,
+        surfaceContainerHighest = base.surfaceContainerHighest,
+        outlineVariant = base.outlineVariant.copy(alpha = 0.58f),
+        primaryContainer = base.primaryContainer,
+        secondaryContainer = base.secondaryContainer,
+        tertiaryContainer = base.tertiaryContainer
+    )
+
 @Composable
 expect fun MRTBuddyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

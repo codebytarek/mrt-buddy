@@ -72,7 +72,7 @@ class TransactionRepository(
                 null
             }
             TransactionEntityWithAmount(transactionEntity = transaction, amount = amount)
-        }.filter { transaction -> transaction.amount != null }
+        }
     }
 
     suspend fun getLatestBalanceByCardIdm(cardIdm: String): Int? {

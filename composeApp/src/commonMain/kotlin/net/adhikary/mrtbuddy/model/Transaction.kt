@@ -18,8 +18,28 @@ data class TransactionWithAmount(
 )
 
 sealed class TransactionType {
-    data object Commute : TransactionType()
+    data object CommuteHatirjheelBusStart : TransactionType()
+    data object CommuteHatirjheelBusEnd : TransactionType()
+    data object CommuteDhakaMetro : TransactionType()
+    data object CommuteUnknown : TransactionType()
     data object BalanceUpdate : TransactionType()
+
+    companion object {
+        fun fromHeader(fixedHeader: String): TransactionType = when (fixedHeader) {
+            "42 D6 30 00" -> CommuteHatirjheelBusEnd
+            "08 D2 20 00" -> CommuteHatirjheelBusStart
+            "08 52 10 00" -> CommuteDhakaMetro
+            "1D 60 02 01", "42 60 02 00" -> BalanceUpdate
+            else -> CommuteUnknown
+        }
+
+        /** Unifies balance-update records and card Recharge station records as one add-money event. */
+        fun isRecharge(fixedHeader: String, fromStation: String, toStation: String): Boolean =
+            fromHeader(fixedHeader) == BalanceUpdate ||
+                fromStation.equals("Recharge", ignoreCase = true) ||
+                toStation.equals("Recharge", ignoreCase = true) ||
+                (fromStation.isBlank() && toStation.isBlank())
+    }
 }
 
 sealed class CardState {

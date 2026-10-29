@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,13 +81,20 @@ import mrtbuddy.composeapp.generated.resources.selectLanguageDescription
 import mrtbuddy.composeapp.generated.resources.settings
 import mrtbuddy.composeapp.generated.resources.settingsAndMore
 import mrtbuddy.composeapp.generated.resources.settingsAndMoreDescription
+import mrtbuddy.composeapp.generated.resources.darkTheme
+import mrtbuddy.composeapp.generated.resources.followSystem
+import mrtbuddy.composeapp.generated.resources.lightTheme
+import mrtbuddy.composeapp.generated.resources.darkThemeEnabled
+import mrtbuddy.composeapp.generated.resources.selectThemeDescription
 import mrtbuddy.composeapp.generated.resources.stationMap
 import mrtbuddy.composeapp.generated.resources.station_map
 import net.adhikary.mrtbuddy.Language
 import net.adhikary.mrtbuddy.ui.screens.more.MoreScreenAction
 import net.adhikary.mrtbuddy.ui.screens.more.MoreScreenEvent
 import net.adhikary.mrtbuddy.ui.screens.more.MoreScreenViewModel
+import net.adhikary.mrtbuddy.repository.DarkThemeConfig
 import net.adhikary.mrtbuddy.ui.theme.Transparent
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -131,8 +140,8 @@ fun MoreScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.78f),
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.62f)
                     )
                 )
             ),
@@ -149,6 +158,7 @@ fun MoreScreen(
             AnimatedSettingsSection(
                 autoSaveEnabled = uiState.autoSaveEnabled,
                 currentLanguage = uiState.currentLanguage,
+                darkThemeConfig = uiState.darkThemeConfig,
                 onAutoSaveToggle = { enabled ->
                     viewModel.onAction(MoreScreenAction.SetAutoSave(enabled))
                 },
@@ -158,7 +168,8 @@ fun MoreScreen(
                     } else {
                         viewModel.onAction(MoreScreenAction.SetLanguage(Language.English.isoFormat))
                     }
-                }
+                },
+                onDarkThemeCycle = { viewModel.onAction(MoreScreenAction.CycleDarkTheme) }
             )
         }
 
@@ -232,7 +243,7 @@ private fun EnhancedHeaderSection() {
     ) {
         // Background blur effect simulation
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(32.dp)),
             shape = RoundedCornerShape(32.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.Transparent
@@ -245,10 +256,10 @@ private fun EnhancedHeaderSection() {
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f),
-                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.56f),
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.44f),
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f),
+                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.30f)
                             ),
                             radius = 600f, // reduced from 800f
                             center = androidx.compose.ui.geometry.Offset(0.3f, 0.2f)
@@ -432,8 +443,10 @@ private fun ModernFeatureChip(
 private fun AnimatedSettingsSection(
     autoSaveEnabled: Boolean,
     currentLanguage: String,
+    darkThemeConfig: DarkThemeConfig,
     onAutoSaveToggle: (Boolean) -> Unit,
-    onLanguageToggle: () -> Unit
+    onLanguageToggle: () -> Unit,
+    onDarkThemeCycle: () -> Unit
 ) {
     ModernSectionCard(
         title = stringResource(Res.string.settings),
@@ -481,6 +494,38 @@ private fun AnimatedSettingsSection(
                 }
             },
             onClick = onLanguageToggle
+        )
+
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+        )
+
+        ModernSettingItem(
+            title = stringResource(Res.string.darkTheme),
+            subtitle = stringResource(Res.string.selectThemeDescription),
+            imageVector = Icons.Rounded.Palette,
+            trailing = {
+                val label = when (darkThemeConfig) {
+                    DarkThemeConfig.FOLLOW_SYSTEM -> stringResource(Res.string.followSystem)
+                    DarkThemeConfig.LIGHT -> stringResource(Res.string.lightTheme)
+                    DarkThemeConfig.DARK -> stringResource(Res.string.darkThemeEnabled)
+                }
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text(
+                        text = label,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            onClick = onDarkThemeCycle
         )
     }
 }
@@ -635,12 +680,12 @@ private fun ModernSectionCard(
         }
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(16.dp)),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = Color.Transparent
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             content()
         }
@@ -653,6 +698,7 @@ private fun ModernSettingItem(
     title: String,
     subtitle: String? = null,
     icon: Painter? = null,
+    imageVector: ImageVector? = null,
     trailing: @Composable (() -> Unit)? = null,
     showArrow: Boolean = false,
     onClick: () -> Unit
@@ -693,7 +739,7 @@ private fun ModernSettingItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Enhanced Icon with gradient background
-            if (icon != null) {
+            if (icon != null || imageVector != null) {
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -708,12 +754,21 @@ private fun ModernSettingItem(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    if (icon != null) {
+                        Icon(
+                            painter = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = imageVector!!,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
             } else {
                 // Placeholder for items without icons to maintain alignment

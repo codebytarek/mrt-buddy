@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
@@ -68,7 +68,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.balance
 import mrtbuddy.composeapp.generated.resources.cardId
@@ -166,6 +165,11 @@ fun CardItem(
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .scale(animatedScale)
             .rotate(animatedRotation)
+            .border(
+                1.dp,
+                Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.76f), Color.White.copy(alpha = 0.18f))),
+                RoundedCornerShape(20.dp)
+            )
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -193,6 +197,16 @@ fun CardItem(
                 .height(200.dp)
                 .background(cardColor)
         ) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.White.copy(alpha = 0.18f), Color.Transparent, Color.Black.copy(alpha = 0.06f))
+                        )
+                    )
+            )
             // Enhanced card texture with MRT patterns
             Box(
                 modifier = Modifier
@@ -228,56 +242,32 @@ fun CardItem(
                     }
                 }
 
-                // Inline menu overlay (avoid Popup/DropdownMenu which uses SubcomposeLayout)
-                if (showDropdown) {
-                    Card(
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .padding(top = 40.dp)
-                            .zIndex(2f),
-                        shape = RoundedCornerShape(8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    showDropdown = false
-                                    onRenameClick()
-                                }
-                                .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Edit,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Rename Card")
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    showDropdown = false
-                                    onDeleteClick()
-                                }
-                                .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Delete Card", color = MaterialTheme.colorScheme.error)
-                            }
+                DropdownMenu(
+                    expanded = showDropdown,
+                    onDismissRequest = { showDropdown = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Rename Card") },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                        onClick = {
+                            showDropdown = false
+                            onRenameClick()
                         }
-                    }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete Card", color = MaterialTheme.colorScheme.error) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            showDropdown = false
+                            onDeleteClick()
+                        }
+                    )
                 }
             }
 

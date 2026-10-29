@@ -23,7 +23,7 @@ actual fun MRTBuddyTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = glassColorScheme(colorScheme),
         typography = Typography,
         content = content
     )

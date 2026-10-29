@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import net.adhikary.mrtbuddy.model.CardState
 import net.adhikary.mrtbuddy.model.CardReadResult
 import net.adhikary.mrtbuddy.model.Transaction
 import net.adhikary.mrtbuddy.model.TransactionWithAmount
@@ -40,6 +41,11 @@ class MainScreenViewModel(
                 _state.update { it.copy(currentLanguage = language) }
             }
         }
+        viewModelScope.launch {
+            settingsRepository.darkThemeConfig.collect { config ->
+                _state.update { it.copy(darkThemeConfig = config) }
+            }
+        }
     }
 
     val state: StateFlow<MainScreenState> get() = _state.asStateFlow()
@@ -60,53 +66,56 @@ class MainScreenViewModel(
             }
 
             is MainScreenAction.UpdateCardState -> {
-
-                // here state has been copied over new state
                 _state.update {
                     it.copy(cardState = action.newState)
                 }
-
             }
 
             is MainScreenAction.UpdateCardReadResult -> {
-                if (autoSaveEnabled) {
-                    saveCardReadResult(action.cardReadResult)
+                val result = action.cardReadResult
+                if (result.idm.isBlank()) {
+                    _state.update { it.copy(error = "The card scan did not provide a card identifier.") }
+                    return
                 }
+                val mappedTransactions = mapTransactionsWithAmount(result.transactions)
+                _state.update {
+                    it.withScanResult(result, mappedTransactions)
+                }
+
                 viewModelScope.launch {
-                    val card = transactionRepository.getCardByIdm(action.cardReadResult.idm)
-                    val transactionsWithAmount = transactionMapper(action.cardReadResult.transactions)
-                    _state.update {
-                        it.copy(
-                            cardIdm = action.cardReadResult.idm,
-                            cardName = card?.name,
-                            transaction = action.cardReadResult.transactions,
-                            transactionWithAmount = transactionsWithAmount
-                        )
+                    try {
+                        if (autoSaveEnabled) transactionRepository.saveCardReadResult(result)
+                        val card = transactionRepository.getCardByIdm(result.idm)
+                        _state.update { it.copy(cardName = card?.name) }
+                    } catch (e: Exception) {
+                        val message = e.message ?: "Could not save or load this card's history."
+                        _state.update { it.copy(error = message) }
+                        _events.send(MainScreenEvent.Error(message))
+                    } finally {
+                        _state.update { it.copy(historyRevision = it.historyRevision + 1) }
                     }
                 }
             }
         }
     }
-
-    private fun saveCardReadResult(result: CardReadResult) {
-        viewModelScope.launch {
-            transactionRepository.saveCardReadResult(result)
-        }
-    }
-
-    private fun transactionMapper(transactions: List<Transaction>): List<TransactionWithAmount> {
-     return   transactions.mapIndexed { index, transaction ->
-            val amount = if (index + 1 < transactions.size) {
-                transaction.balance - transactions[index + 1].balance
-            } else {
-                null
-            }
-            TransactionWithAmount(
-                transaction = transaction,
-                amount = amount
-            )
-        }
-    }
-
-
 }
+
+internal fun mapTransactionsWithAmount(transactions: List<Transaction>): List<TransactionWithAmount> =
+    transactions.mapIndexed { index, transaction ->
+        val amount = transactions.getOrNull(index + 1)?.let { next ->
+            transaction.balance - next.balance
+        }
+        TransactionWithAmount(transaction = transaction, amount = amount)
+    }
+
+internal fun MainScreenState.withScanResult(
+    result: CardReadResult,
+    transactionsWithAmount: List<TransactionWithAmount> = mapTransactionsWithAmount(result.transactions)
+): MainScreenState = copy(
+    cardIdm = result.idm,
+    cardName = null,
+    transaction = result.transactions,
+    transactionWithAmount = transactionsWithAmount,
+    hasCurrentScanResult = true,
+    error = null
+)

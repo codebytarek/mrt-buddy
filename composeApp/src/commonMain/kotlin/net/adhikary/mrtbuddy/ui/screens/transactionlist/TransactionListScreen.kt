@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +60,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,9 +72,9 @@ import kotlinx.datetime.toLocalDateTime
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.added
 import mrtbuddy.composeapp.generated.resources.balance
-import mrtbuddy.composeapp.generated.resources.balanceUpdate
 import mrtbuddy.composeapp.generated.resources.journeys
 import mrtbuddy.composeapp.generated.resources.noTransactionsFound
+import mrtbuddy.composeapp.generated.resources.recharge
 import mrtbuddy.composeapp.generated.resources.spent
 import mrtbuddy.composeapp.generated.resources.topup
 import mrtbuddy.composeapp.generated.resources.transactionSummary
@@ -89,6 +89,7 @@ import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightNegativeRed
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -111,7 +112,7 @@ fun TransactionListScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize().then(modifier),
-        color = MaterialTheme.colorScheme.background
+        color = Color.Transparent
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -148,7 +149,7 @@ fun TransactionListScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.48f)
                 ),
                 windowInsets = WindowInsets.statusBars
             )
@@ -407,24 +408,37 @@ fun TransactionSummaryCard(
     transactions: List<TransactionEntityWithAmount>,
     currentBalance: Int?
 ) {
-    val commuteTransactions = transactions.filter {
-        it.amount == null || it.amount <= 0
+    val darkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val rechargeTransactions = transactions.filter { item ->
+        val transaction = item.transactionEntity
+        TransactionType.isRecharge(
+            transaction.fixedHeader,
+            transaction.fromStation,
+            transaction.toStation
+        )
     }
-    val balanceUpdates = transactions.filter {
-        it.amount != null && it.amount > 0
+    val commuteTransactions = transactions.filterNot { item ->
+        val transaction = item.transactionEntity
+        TransactionType.isRecharge(
+            transaction.fixedHeader,
+            transaction.fromStation,
+            transaction.toStation
+        )
     }
     val totalSpent = commuteTransactions.mapNotNull { it.amount }.sum()
-    val totalAdded = balanceUpdates.mapNotNull { it.amount }.sum()
+    val totalAdded = rechargeTransactions.mapNotNull { it.amount }.sum()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .glassSurface(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
 //        colors = CardDefaults.cardColors(
 //            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
 //        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -441,7 +455,7 @@ fun TransactionSummaryCard(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${transactions.size + 1} transaction${if (transactions.size != 1) "s" else ""}",
+                    text = "${transactions.size} transaction${if (transactions.size != 1) "s" else ""}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -460,20 +474,20 @@ fun TransactionSummaryCard(
                 SummaryItem(
                     icon = Icons.Default.MonetizationOn,
                     label = stringResource(Res.string.topup),
-                    value = translateNumber(balanceUpdates.size + 1),
-                    color = MaterialTheme.colorScheme.tertiary
+                    value = translateNumber(rechargeTransactions.size),
+                    color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
                     icon = Icons.Default.TrendingUp,
                     label = stringResource(Res.string.added),
-                    value = "৳${translateNumber(totalAdded + 200)}",
-                    color = MaterialTheme.colorScheme.primary
+                    value = "৳${translateNumber(totalAdded)}",
+                    color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
                     icon = Icons.Default.TrendingDown,
                     label = stringResource(Res.string.spent),
                     value = "৳${translateNumber(totalSpent)}",
-                    color = MaterialTheme.colorScheme.error
+                    color = if (darkTheme) DarkNegativeRed else LightNegativeRed
                 )
                 if (currentBalance != null) {
                     SummaryItem(
@@ -532,12 +546,7 @@ fun SummaryItem(
 @Composable
 fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
     val transaction = trxEntity.transactionEntity
-    val isDarkTheme = isSystemInDarkTheme()
-    val transactionType = if (trxEntity.amount != null && trxEntity.amount > 0) {
-        TransactionType.BalanceUpdate
-    } else {
-        TransactionType.Commute
-    }
+    val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
     val animatedScale by animateFloatAsState(
         targetValue = 1f,
@@ -555,23 +564,29 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
         Instant.fromEpochMilliseconds(transaction.dateTime).toLocalDateTime(tz)
     )
 
-    val isPositive = trxEntity.amount != null && trxEntity.amount > 0
+    val isRecharge = TransactionType.isRecharge(
+        transaction.fixedHeader,
+        transaction.fromStation,
+        transaction.toStation
+    )
+    val isPositive = trxEntity.amount != null && (trxEntity.amount > 0 || isRecharge)
     val amountColor = when {
-        isPositive -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
-        trxEntity.amount != null -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
-        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        isRecharge -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
+        trxEntity.amount == null -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        trxEntity.amount < 0 -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
+        trxEntity.amount > 0 -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .scale(animatedScale)
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .glassSurface(RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -591,7 +606,7 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(
-                            if (transactionType == TransactionType.BalanceUpdate) {
+                            if (isRecharge) {
                                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                             } else {
                                 MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
@@ -600,14 +615,14 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (transactionType == TransactionType.BalanceUpdate) {
+                        imageVector = if (isRecharge) {
                             Icons.Default.TrendingUp
                         } else {
                             Icons.Default.DirectionsTransit
                         },
                         contentDescription = null,
-                        tint = if (transactionType == TransactionType.BalanceUpdate) {
-                            MaterialTheme.colorScheme.primary
+                        tint = if (isRecharge) {
+                            if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
                         } else {
                             MaterialTheme.colorScheme.secondary
                         },
@@ -620,12 +635,12 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = if (transactionType == TransactionType.Commute) {
+                        text = if (!isRecharge) {
                             "${StationService.translate(transaction.fromStation)} → ${
                                 StationService.translate(transaction.toStation)
                             }"
                         } else {
-                            stringResource(Res.string.balanceUpdate)
+                            stringResource(Res.string.recharge)
                         },
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
@@ -697,12 +712,13 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     }
                 }
 
-                Text(
-                    text = if (transactionType == TransactionType.BalanceUpdate) stringResource(Res.string.topup) else stringResource(
-                        Res.string.journeys),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+                if (!isRecharge) {
+                    Text(
+                        text = stringResource(Res.string.journeys),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             }
         }
     }

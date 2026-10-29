@@ -68,7 +68,8 @@ fun OpenSourceLicensesScreen(
     )
 
     LaunchedEffect(Unit) {
-        content = Res.readBytes("files/open-source-licenses.md").decodeToString()
+        val libraryLicenses = Res.readBytes("files/open-source-licenses.md").decodeToString()
+        content = "$libraryLicenses\n\n## More navigation icon\n\nMenu icon (asset 8107105) from [Flaticon](https://www.flaticon.com/free-icon/menu_8107105?term=more&related_id=8107105). Used under the Flaticon free license with attribution."
     }
 
     LazyColumn(
@@ -87,7 +88,7 @@ fun OpenSourceLicensesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.48f)
                 ),
                 windowInsets = WindowInsets.statusBars
             )

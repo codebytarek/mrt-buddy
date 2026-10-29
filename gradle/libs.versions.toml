@@ -1,8 +1,8 @@
 [versions]
 agp = "8.12.0"
-android-compileSdk = "35"
+android-compileSdk = "37"
 android-minSdk = "24"
-android-targetSdk = "35"
+android-targetSdk = "37"
 androidx-activityCompose = "1.9.3"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.0"
@@ -30,6 +30,7 @@ sqlite = "2.5.0-SNAPSHOT"
 napier = "2.7.1"
 coilCompose = "3.0.4"
 zoomimageComposeCoil3 = "1.1.0-rc01"
+compottie = "1.1.2"
 
 [libraries]
 compose-webview-multiplatform = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "composeWebviewMultiplatform" }
@@ -52,6 +53,7 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-coroutine = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutine" }
+kotlinx-coroutine-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutine" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
@@ -62,6 +64,7 @@ sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sql
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimageComposeCoil3" }
+compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "compottie" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

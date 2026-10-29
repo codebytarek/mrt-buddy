@@ -1,6 +1,5 @@
 package net.adhikary.mrtbuddy.ui.components
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,10 +20,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.luminance
 import kotlinx.datetime.LocalDateTime
 import mrtbuddy.composeapp.generated.resources.Res
-import mrtbuddy.composeapp.generated.resources.balanceUpdate
 import mrtbuddy.composeapp.generated.resources.recentJourneys
+import mrtbuddy.composeapp.generated.resources.recharge
 import net.adhikary.mrtbuddy.model.TransactionType
 import net.adhikary.mrtbuddy.model.TransactionWithAmount
 import net.adhikary.mrtbuddy.nfc.service.StationService
@@ -34,14 +34,19 @@ import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightNegativeRed
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
+import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TransactionHistoryList(transactions: List<TransactionWithAmount>) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(24.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassSurface(RoundedCornerShape(24.dp)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
     ) {
         LazyColumn(
             modifier = Modifier
@@ -61,14 +66,11 @@ fun TransactionHistoryList(transactions: List<TransactionWithAmount>) {
                 )
             }
             
-            val validTransactions = transactions.filter { it.transaction.timestamp.year >= 2015 }
+            val validTransactions = transactions
 
             items(validTransactions) { transactionWithAmount ->
                 TransactionItem(
-                    type = if (transactionWithAmount.amount != null && transactionWithAmount.amount > 0)
-                        TransactionType.BalanceUpdate
-                    else
-                        TransactionType.Commute,
+                    type = TransactionType.fromHeader(transactionWithAmount.transaction.fixedHeader),
                     date = transactionWithAmount.transaction.timestamp,
                     fromStation = transactionWithAmount.transaction.fromStation,
                     toStation = transactionWithAmount.transaction.toStation,
@@ -99,7 +101,11 @@ fun TransactionItem(
     amount: String,
     amountValue: Int?
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val isRecharge = type == TransactionType.BalanceUpdate ||
+        fromStation.equals("Recharge", ignoreCase = true) ||
+        toStation.equals("Recharge", ignoreCase = true) ||
+        (fromStation.isBlank() && toStation.isBlank())
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,9 +119,9 @@ fun TransactionItem(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = if (type == TransactionType.Commute)
+                text = if (!isRecharge)
                     "${StationService.translate(fromStation)} → ${StationService.translate(toStation)}"
-                else stringResource(Res.string.balanceUpdate),
+                else stringResource(Res.string.recharge),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -132,9 +138,10 @@ fun TransactionItem(
             modifier = Modifier.padding(start = 8.dp)
         ) {
             val amountColor = when {
+                isRecharge -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
                 amountValue == null -> MaterialTheme.colorScheme.onSurface
-                amountValue > 0 -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
-                else -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
+                amountValue < 0 -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
+                else -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
             }
 
             Text(

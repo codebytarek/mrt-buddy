@@ -1,32 +1,20 @@
 package net.adhikary.mrtbuddy.nfc.parser
 
-import kotlinx.datetime.LocalDateTime
 import net.adhikary.mrtbuddy.model.Transaction
 import net.adhikary.mrtbuddy.nfc.service.StationService
 import net.adhikary.mrtbuddy.nfc.service.TimestampService
 
 object TransactionParser {
-    private fun isValidTransaction(transaction: Transaction): Boolean {
-        val cutoffDate = LocalDateTime(2020, 1, 1, 0, 0)
-        return transaction.timestamp > cutoffDate;
-    }
-
     fun parseTransactionResponse(response: ByteArray): List<Transaction> {
         val transactions = mutableListOf<Transaction>()
 
-//        Log.d("NFC", "Response: ${ByteParser.toHexString(response)}")
-
-        if (response.size < 13) {
-//            Log.e("NFC", "Response too short")
-            return transactions
-        }
+        require(response.size >= 13) { "FeliCa response is shorter than its header" }
 
         val statusFlag1 = response[10]
         val statusFlag2 = response[11]
 
         if (statusFlag1 != 0x00.toByte() || statusFlag2 != 0x00.toByte()) {
-//            Log.e("NFC", "Error reading card: Status flags $statusFlag1 $statusFlag2")
-            return transactions
+            error("FeliCa card rejected the read request (status $statusFlag1/$statusFlag2)")
         }
 
         val numBlocks = response[12].toInt() and 0xFF
@@ -34,17 +22,15 @@ object TransactionParser {
 
         val blockSize = 16
         if (blockData.size < numBlocks * blockSize) {
-//            Log.e("NFC", "Incomplete block data")
-            return transactions
+            error("FeliCa response contains incomplete transaction blocks")
         }
 
         for (i in 0 until numBlocks) {
             val offset = i * blockSize
             val block = blockData.copyOfRange(offset, offset + blockSize)
+            if (block.all { it == 0.toByte() }) continue
             val transaction = parseTransactionBlock(block)
-            if (isValidTransaction(transaction)) {
-                transactions.add(transaction)
-            }
+            transactions.add(transaction)
         }
 
         return transactions

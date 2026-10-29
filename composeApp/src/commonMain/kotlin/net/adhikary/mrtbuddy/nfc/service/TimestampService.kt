@@ -69,16 +69,24 @@ object TimestampService {
         // Calculate the actual year
         val fullYear = getBaseYear() + year
 
-        // Validate month and day
-        val validMonth = if (month in 1..12) month else 1
-        val validDay = if (day in 1..31) day else 1
+        require(month in 1..12) { "Invalid transaction month: $month" }
+        require(hour in 0..23) { "Invalid transaction hour: $hour" }
+        val validMonth = month
+        val leapYear = fullYear % 4 == 0 && (fullYear % 100 != 0 || fullYear % 400 == 0)
+        val maxDay = when (validMonth) {
+            2 -> if (leapYear) 29 else 28
+            4, 6, 9, 11 -> 30
+            else -> 31
+        }
+        require(day in 1..maxDay) { "Invalid transaction day: $day/$validMonth" }
+        val validDay = day
 
         // Create a LocalDateTime instance
         return LocalDateTime(
             year = fullYear,
             monthNumber = validMonth,
             dayOfMonth = validDay,
-            hour = hour % 24,
+            hour = hour,
             minute = 0,
             second = 0,
             nanosecond = 0

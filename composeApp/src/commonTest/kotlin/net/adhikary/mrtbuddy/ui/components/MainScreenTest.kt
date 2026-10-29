@@ -1,44 +1,68 @@
 package net.adhikary.mrtbuddy.ui.components
 
 import kotlin.test.Test
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
-import net.adhikary.mrtbuddy.ui.navigation.Screen
-import net.adhikary.mrtbuddy.ui.viewmodel.FareCalculatorViewModel
-import net.adhikary.mrtbuddy.model.CardState
-
+import kotlin.test.assertTrue
+import kotlinx.datetime.LocalDateTime
+import net.adhikary.mrtbuddy.model.CardReadResult
+import net.adhikary.mrtbuddy.model.Transaction
+import net.adhikary.mrtbuddy.ui.screens.home.MainScreenState
+import net.adhikary.mrtbuddy.ui.screens.home.withScanResult
+import net.adhikary.mrtbuddy.ui.screens.home.Screen
+import net.adhikary.mrtbuddy.model.TransactionType
 
 class MainScreenTest {
-    private lateinit var viewModel: FareCalculatorViewModel
-    private lateinit var navigationState: NavigationTestState
+    private class NavigationState(var currentScreen: Screen = Screen.Home)
 
-    private class NavigationTestState {
-        var currentScreen: Screen = Screen.CardScan
-    }
+    @Test
+    fun navigationStateCanMoveBetweenExistingDestinations() {
+        val state = NavigationState()
 
-    @BeforeTest
-    fun setup() {
-        FareCalculatorViewModel.reset()
-        viewModel = FareCalculatorViewModel.getInstance()
-        navigationState = NavigationTestState()
+        assertEquals(Screen.Home, state.currentScreen)
+        state.currentScreen = Screen.Calculator
+        assertEquals(Screen.Calculator, state.currentScreen)
+        state.currentScreen = Screen.Home
+        assertEquals(Screen.Home, state.currentScreen)
     }
 
     @Test
-    fun testNavigationFlow() {
-        // Test initial screen
-        assertEquals(Screen.CardScan, navigationState.currentScreen)
+    fun successfulScanPopulatesVisibleJourneyStateAndKeepsUnknownFareUnknown() {
+        val newest = transaction(day = 2, balance = 960)
+        val oldest = transaction(day = 1, balance = 1000)
+        val state = MainScreenState().withScanResult(
+            CardReadResult("04 01 02 03", listOf(newest, oldest))
+        )
 
-        // Test navigation to Fare Calculator
-        navigationState.currentScreen = Screen.FareCalculator
-        assertEquals(Screen.FareCalculator, navigationState.currentScreen)
-
-        // Test navigation back to Card Scan
-        navigationState.currentScreen = Screen.CardScan
-        assertEquals(Screen.CardScan, navigationState.currentScreen)
+        assertTrue(state.hasCurrentScanResult)
+        assertEquals("04 01 02 03", state.cardIdm)
+        assertEquals(listOf(newest, oldest), state.transaction)
+        assertEquals(-40, state.transactionWithAmount[0].amount)
+        assertEquals(null, state.transactionWithAmount[1].amount)
     }
 
     @Test
-    fun testInitialScreen() {
-        assertEquals(Screen.CardScan, navigationState.currentScreen)
+    fun transactionKindComesFromTheCardFixedHeader() {
+        assertEquals(
+            TransactionType.BalanceUpdate,
+            TransactionType.fromHeader("1D 60 02 01")
+        )
+        assertEquals(
+            TransactionType.CommuteDhakaMetro,
+            TransactionType.fromHeader("08 52 10 00")
+        )
+        assertEquals(
+            TransactionType.CommuteUnknown,
+            TransactionType.fromHeader("00 00 00 00")
+        )
     }
+
+    private fun transaction(day: Int, balance: Int) = Transaction(
+        fixedHeader = "01 02 03 04",
+        timestamp = LocalDateTime(2019, 7, day, 10, 30),
+        transactionType = "00 01",
+        fromStation = "Farmgate",
+        toStation = "Karwan Bazar",
+        balance = balance,
+        trailing = "00 00"
+    )
 }

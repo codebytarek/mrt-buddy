@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.SwapVert
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.rounded.Percent
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,8 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -41,7 +38,6 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
@@ -49,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import androidx.compose.ui.Alignment
 import net.adhikary.mrtbuddy.getPlatform
 import net.adhikary.mrtbuddy.managers.RescanManager
@@ -61,13 +58,10 @@ import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorViewModel
 import mrtbuddy.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.foundation.background
 import mrtbuddy.composeapp.generated.resources.fromStationLabel
 import mrtbuddy.composeapp.generated.resources.journeyInformationDescription
 import mrtbuddy.composeapp.generated.resources.journeyInformationLabel
 import mrtbuddy.composeapp.generated.resources.rescan
-import mrtbuddy.composeapp.generated.resources.route
 import mrtbuddy.composeapp.generated.resources.selectDestination
 import mrtbuddy.composeapp.generated.resources.selectOrigin
 import mrtbuddy.composeapp.generated.resources.selectRouteDescription
@@ -75,11 +69,6 @@ import mrtbuddy.composeapp.generated.resources.selectRouteText
 import mrtbuddy.composeapp.generated.resources.singleTicket
 import mrtbuddy.composeapp.generated.resources.tapToCheckSufficientBalance
 import mrtbuddy.composeapp.generated.resources.toStationLabel
-import mrtbuddy.composeapp.generated.resources.travelTips1
-import mrtbuddy.composeapp.generated.resources.travelTips2
-import mrtbuddy.composeapp.generated.resources.travelTips3
-import mrtbuddy.composeapp.generated.resources.travelTipsDescription
-import mrtbuddy.composeapp.generated.resources.travelTipsLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,10 +80,11 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize(),
+                .animateContentSize()
+                .glassSurface(RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier
                 .fillMaxWidth()
@@ -122,24 +112,27 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor =  MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(if (isCompact) 10.dp else 14.dp),
                     ) {
                         // Circular icon avatar on the left
                         Surface(
-                            modifier = Modifier.size(if (isCompact) 52.dp else 64.dp),
-                            shape = CircleShape,
-                            color = Color.Transparent
+                            modifier = Modifier
+                                .size(if (isCompact) 44.dp else 52.dp)
+                                .glassSurface(RoundedCornerShape(15.dp)),
+                            shape = RoundedCornerShape(15.dp),
+                            color = Color.Transparent,
                         ) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Route,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(if (isCompact) 22.dp else 28.dp)
                                 )
                             }
@@ -150,13 +143,13 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                             Text(
                                 text = stringResource(Res.string.selectRouteText),
                                 style = if (isCompact) MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.onPrimary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = stringResource(Res.string.selectRouteDescription),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.92f),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 2
                             )
                         }
@@ -166,12 +159,14 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                             modifier = Modifier
                                 .size(44.dp)
                                 .scale(swapScale)
+                                .glassSurface(CircleShape)
                                 .clickable(enabled = uiState.fromStation != null && uiState.toStation != null) {
                                     swapAnimCount.value = swapAnimCount.value + 1
                                     viewModel.onAction(FareCalculatorAction.SwapStations)
                                 },
                             shape = CircleShape,
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Icon(
@@ -211,11 +206,10 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                             if (combinedAnchor.value == "from") {
                                 // Inline dropdown instead of Dialog
                                 Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 56.dp), // Position below chip
-                                    shape = RoundedCornerShape(12.dp),
-                                    elevation = CardDefaults.elevatedCardElevation(4.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(top = 84.dp).glassSurface(RoundedCornerShape(16.dp)),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                                    elevation = CardDefaults.elevatedCardElevation(0.dp)
                                 ) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                                         Text(text = stringResource(Res.string.fromStationLabel), style = MaterialTheme.typography.labelLarge)
@@ -257,11 +251,10 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                             if (combinedAnchor.value == "to") {
                                 // Inline dropdown instead of Dialog
                                 Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 56.dp), // Position below chip
-                                    shape = RoundedCornerShape(12.dp),
-                                    elevation = CardDefaults.elevatedCardElevation(4.dp)
+                                    modifier = Modifier.fillMaxWidth().padding(top = 84.dp).glassSurface(RoundedCornerShape(16.dp)),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                                    elevation = CardDefaults.elevatedCardElevation(0.dp)
                                 ) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                                         Text(text = stringResource(Res.string.toStationLabel), style = MaterialTheme.typography.labelLarge)
@@ -293,25 +286,7 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                     }
                 }
 
-                // Short simple steps for all ages
-                GettingStartedSteps()
             }
-        }
-    }
-}
-
-@Composable
-fun GettingStartedSteps() {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), elevation = CardDefaults.elevatedCardElevation(2.dp)) {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = "How to use (simple)", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "1) Tap 'From' → choose station", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "2) Tap 'To' → choose destination", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "3) Tap your card on the reader to check balance", style = MaterialTheme.typography.bodyMedium)
-            }
-            Icon(imageVector = Icons.Default.AccessTime, contentDescription = "Quick help", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(36.dp))
         }
     }
 }
@@ -325,24 +300,44 @@ fun StationChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = color),
-        modifier = modifier
-            .sizeIn(minWidth = 140.dp, minHeight = 56.dp)
-            .padding(0.dp)
-            .semantics { contentDescription = "$label: $value" }
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Card(
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .glassSurface(RoundedCornerShape(18.dp))
+                .sizeIn(minWidth = 140.dp, minHeight = 58.dp)
+                .semantics { contentDescription = "$label: $value" }
+                .clickable(onClick = onClick)
         ) {
-            Icon(imageVector = leading, contentDescription = label, tint = MaterialTheme.colorScheme.onSurface)
-            Column {
-                Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                Text(text = value, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold))
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = color.copy(alpha = 0.18f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(imageVector = leading, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1
+                )
+                Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Choose $label", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -355,9 +350,10 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
         val vmState = viewModel.state.value
 
         Card(
-            modifier = Modifier.fillMaxWidth().animateContentSize(),
+            modifier = Modifier.fillMaxWidth().animateContentSize().glassSurface(RoundedCornerShape(20.dp)),
             shape = RoundedCornerShape(20.dp),
-            elevation = CardDefaults.elevatedCardElevation(8.dp)
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             when (val cs = uiState.cardState) {
                 is CardState.Balance -> {
@@ -446,22 +442,13 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
                         if (!enough) {
                             Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
-                                    text = "Insufficient balance to cover this trip. Please top up your card to complete the journey.",
+                                    text = "Insufficient balance to cover this trip. Please top up your card to complete your journey.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
                         }
 
-//                        // Actions
-//                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-//                            ElevatedButton(onClick = { /* route */ }, modifier = Modifier.weight(1f), enabled = uiState.fromStation != null && uiState.toStation != null) {
-//                                Text(text = stringResource(Res.string.route), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-//                            }
-//                            OutlinedButton(onClick = { /* tips */ }, modifier = Modifier.weight(1f)) {
-//                                Text(text = stringResource(Res.string.travelTipsLabel), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-//                            }
-//                        }
                         // --- end merged Travel Info section ---
                      }
                  }
@@ -487,75 +474,9 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
                         Text(text = "${stringResource(Res.string.singleTicket)} ৳ ${translateNumber(vmState.calculatedFare)}", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                         Text(text = stringResource(Res.string.tapToCheckSufficientBalance), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            ElevatedButton(onClick = { /* route preview */ }, modifier = Modifier.weight(1f), enabled = uiState.fromStation != null && uiState.toStation != null) {
-                                Text(text = stringResource(Res.string.route), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                            }
-                            OutlinedButton(onClick = { /* tips */ }, modifier = Modifier.weight(1f)) {
-                                Text(text = stringResource(Res.string.travelTipsLabel), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-                            }
-                        }
                     }
                 }
             }
         }
-    }
-}
-@Composable
-fun QuickTipsCard() {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val isCompact = maxWidth < 420.dp
-
-        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.elevatedCardElevation(4.dp)) {
-            if (isCompact) {
-                Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Card(modifier = Modifier.size(36.dp), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f))) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Icon(imageVector = Icons.Default.AccessTime, contentDescription = stringResource(Res.string.travelTipsLabel), tint = MaterialTheme.colorScheme.tertiary)
-                            }
-                        }
-                        Column {
-                            Text(text = stringResource(Res.string.travelTipsLabel), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-                            Text(text = stringResource(Res.string.travelTipsDescription), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        }
-                    }
-
-                    TipItem(icon = Icons.Default.AccountBalanceWallet, text = stringResource(Res.string.travelTips1), iconColor = MaterialTheme.colorScheme.primary)
-                    TipItem(icon = Icons.Default.AccessTime, text = stringResource(Res.string.travelTips2), iconColor = MaterialTheme.colorScheme.secondary)
-                    TipItem(icon = Icons.Default.Route, text = stringResource(Res.string.travelTips3), iconColor = MaterialTheme.colorScheme.tertiary)
-                }
-            } else {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Card(modifier = Modifier.size(40.dp), shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f))) {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Icon(imageVector = Icons.Default.AccessTime, contentDescription = stringResource(Res.string.travelTipsLabel), tint = MaterialTheme.colorScheme.tertiary)
-                            }
-                        }
-                        Column {
-                            Text(text = stringResource(Res.string.travelTipsLabel), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                            Text(text = stringResource(Res.string.travelTipsDescription), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                        }
-                    }
-
-                    TipItem(icon = Icons.Default.AccountBalanceWallet, text = stringResource(Res.string.travelTips1), iconColor = MaterialTheme.colorScheme.primary)
-                    TipItem(icon = Icons.Default.AccessTime, text = stringResource(Res.string.travelTips2), iconColor = MaterialTheme.colorScheme.secondary)
-                    TipItem(icon = Icons.Default.Route, text = stringResource(Res.string.travelTips3), iconColor = MaterialTheme.colorScheme.tertiary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TipItem(icon: ImageVector, text: String, iconColor: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        Card(modifier = Modifier.size(28.dp), shape = RoundedCornerShape(8.dp), colors = CardDefaults.cardColors(containerColor = iconColor.copy(alpha = 0.12f))) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Icon(imageVector = icon, contentDescription = null, tint = iconColor)
-            }
-        }
-        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
     }
 }

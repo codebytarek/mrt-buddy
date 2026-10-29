@@ -48,7 +48,7 @@ fun StationMapScreen(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.48f)
             ),
             windowInsets = WindowInsets.statusBars
         )

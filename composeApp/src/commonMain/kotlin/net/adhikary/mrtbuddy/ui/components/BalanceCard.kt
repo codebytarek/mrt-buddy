@@ -1,19 +1,17 @@
 package net.adhikary.mrtbuddy.ui.components
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -51,17 +49,24 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -72,6 +77,11 @@ import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningText
 import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningTitle
 import mrtbuddy.composeapp.generated.resources.hold
 import mrtbuddy.composeapp.generated.resources.keepCardSteady
+import io.github.alexzhirkevich.compottie.LottieAnimation
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.LottieConstants
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import mrtbuddy.composeapp.generated.resources.latestBalance
 import mrtbuddy.composeapp.generated.resources.lowBalance
 import mrtbuddy.composeapp.generated.resources.nfcDisabledText
@@ -99,6 +109,7 @@ import net.adhikary.mrtbuddy.ui.theme.DarkMRTPass
 import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
 
@@ -120,16 +131,17 @@ fun BalanceCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .scale(animatedScale)
+            .glassSurface(RoundedCornerShape(28.dp))
             .shadow(
-                elevation = 16.dp,
+                elevation = 0.dp,
                 shape = RoundedCornerShape(28.dp),
                 ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                 spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
             ),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp), // Custom shadow
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(28.dp), // More rounded corners
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color.Transparent
         )
     ) {
         Box(Modifier.fillMaxWidth().wrapContentHeight()) {
@@ -254,10 +266,10 @@ fun BalanceCard(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(
-                        start = 28.dp,
-                        end = 28.dp,
-                        top = if (!cardName.isNullOrBlank() && cardState is CardState.Balance) 100.dp else 28.dp, // Add top padding when header is present
-                        bottom = 28.dp
+                        start = 24.dp,
+                        end = 24.dp,
+                        top = if (!cardName.isNullOrBlank() && cardState is CardState.Balance) 88.dp else 20.dp,
+                        bottom = 20.dp
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = if (cardName.isNullOrBlank() || cardState !is CardState.Balance) {
@@ -290,60 +302,13 @@ fun BalanceCard(
 }
 
 @Composable
-private fun ModernPulsingEffect(iconSize: Dp) {
-    val infiniteTransition = rememberInfiniteTransition()
-
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 0.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    val density = LocalDensity.current
-    val radiusPx = with(density) { (iconSize.toPx() / 2) * pulseScale }
-    val strokeWidth = with(density) { 3.dp.toPx() }
-    val primaryColor = MaterialTheme.colorScheme.primary
-
-    Canvas(
-        modifier = Modifier.size(iconSize * 2.5f)
-    ) {
-        // Outer pulse circle
-        drawCircle(
-            color = primaryColor.copy(alpha = pulseAlpha * 0.3f),
-            radius = radiusPx,
-            center = center
-        )
-
-        // Inner pulse ring
-        drawCircle(
-            color = primaryColor.copy(alpha = pulseAlpha),
-            radius = radiusPx * 0.7f,
-            center = center,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-        )
-    }
-}
-
-@Composable
 private fun ModernBalanceContent(
     amount: Int,
     hasHeader: Boolean = false
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         if (!hasHeader) {
             Text(
@@ -356,48 +321,27 @@ private fun ModernBalanceContent(
         }
 
         // Modern balance display with enhanced status indication
-        val (balanceColor, balanceIcon, statusGradient) = when {
-            amount <= 20 -> Triple(
+        val (balanceColor, balanceIcon) = when {
+            amount <= 20 -> Pair(
                 MaterialTheme.colorScheme.error,
-                Icons.Default.Warning,
-                Brush.radialGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
-                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
-                    )
-                )
+                Icons.Default.Warning
             )
 
-            amount <= 70 -> Triple(
+            amount <= 70 -> Pair(
                 if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L,
-                Icons.Default.Info,
-                Brush.radialGradient(
-                    colors = listOf(
-                        (if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L).copy(alpha = 0.3f),
-                        (if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L).copy(alpha = 0.1f)
-                    )
-                )
+                Icons.Default.Info
             )
 
-            else -> Triple(
+            else -> Pair(
                 MaterialTheme.colorScheme.primary,
-                Icons.Default.CheckCircle,
-                Brush.radialGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                    )
-                )
+                Icons.Default.CheckCircle
             )
         }
 
-        // Enhanced balance container with gradient background
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(statusGradient)
-                .padding(24.dp),
+                .padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -408,13 +352,14 @@ private fun ModernBalanceContent(
                     imageVector = balanceIcon,
                     contentDescription = null,
                     tint = balanceColor,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(32.dp)
                 )
 
                 Text(
                     text = "৳ ${translateNumber(amount)}",
                     style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 48.sp
                     ),
                     color = balanceColor
                 )
@@ -496,61 +441,86 @@ private fun ModernBalanceContent(
 }
 
 @Composable
+@OptIn(ExperimentalResourceApi::class)
+private fun NfcReadingAnimation(size: Dp = 172.dp) {
+    val foreground = MaterialTheme.colorScheme.onSurface
+    val surface = MaterialTheme.colorScheme.surface
+    val accent = MaterialTheme.colorScheme.primary
+    val pulse = rememberInfiniteTransition(label = "nfc_pulse")
+    val pulseOne by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(animation = tween(1700), repeatMode = RepeatMode.Restart),
+        label = "nfc_pulse_one"
+    )
+    val pulseTwo by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(animation = tween(1700, delayMillis = 850), repeatMode = RepeatMode.Restart),
+        label = "nfc_pulse_two"
+    )
+    var animationJson by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(foreground, surface) {
+        fun rgba(color: Color) = "[${color.red},${color.green},${color.blue},1]"
+        animationJson = runCatching {
+            Res.readBytes("files/nfc-reading-universal.json")
+                .decodeToString()
+                // Use the same supplied motion on every background. Tint its mark with the
+                // active theme and blend the center into the current screen surface.
+                .replace("\"k\":[0.2392,0.2431,0,1]", "\"k\":${rgba(foreground)}")
+                .replace("\"k\":[1,1,1,1]", "\"k\":${rgba(surface)}")
+        }.getOrNull()
+    }
+    val json = animationJson
+    Box(
+        modifier = Modifier
+            .size(size)
+            .drawBehind {
+                listOf(pulseOne, pulseTwo).forEach { progress ->
+                    val radius = this.size.minDimension * (0.16f + 0.35f * progress)
+                    drawCircle(
+                        color = accent.copy(alpha = 0.30f * (1f - progress)),
+                        radius = radius,
+                        style = Stroke(width = 1.5.dp.toPx())
+                    )
+                }
+            }
+            .semantics { contentDescription = "NFC card scanning animation" },
+        contentAlignment = Alignment.Center
+    ) {
+        if (json == null) {
+            Icon(
+                imageVector = Icons.Default.Contactless,
+                contentDescription = null,
+                modifier = Modifier.size(size * 0.5f),
+                tint = foreground
+            )
+        } else {
+            val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+            composition?.let {
+                LottieAnimation(
+                    composition = it,
+                    iterations = LottieConstants.IterateForever,
+                    modifier = Modifier.size(size)
+                )
+            } ?: Icon(
+            imageVector = Icons.Default.Contactless,
+            contentDescription = null,
+            modifier = Modifier.size(size * 0.5f),
+            tint = foreground
+            )
+        }
+    }
+}
+
+@Composable
 private fun ModernReadingContent() {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Modern reading animation with spinning effect
-        Box(contentAlignment = Alignment.Center) {
-            val infiniteTransition = rememberInfiniteTransition()
-            val rotation by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 2000, easing = LinearEasing)
-                )
-            )
-            val primaryColor = MaterialTheme.colorScheme.primary
-
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                // Rotating outer ring
-                Canvas(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .scale(1f, 1f)
-                ) {
-                    drawArc(
-                        color = primaryColor.copy(alpha = 0.8f),
-                        startAngle = rotation,
-                        sweepAngle = 120f,
-                        useCenter = false,
-                        style = Stroke(width = 6.dp.toPx(), cap = StrokeCap.Round)
-                    )
-                }
-
-                Icon(
-                    imageVector = Icons.Outlined.Contactless,
-                    contentDescription = "Reading",
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
+        NfcReadingAnimation()
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -598,33 +568,26 @@ private fun ModernWaitingContent() {
         modifier = Modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(28.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            if (getPlatform().name == "android") {
-                ModernPulsingEffect(iconSize = 80.dp)
-            }
-
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(176.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                                Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.52f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.12f),
+                                Color.Transparent
                             )
                         )
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Contactless,
-                    contentDescription = "Tap Card",
-                    modifier = Modifier.size(50.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                NfcReadingAnimation(size = 136.dp)
             }
         }
 

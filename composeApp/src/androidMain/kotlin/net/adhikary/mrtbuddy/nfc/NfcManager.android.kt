@@ -15,6 +15,7 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -213,7 +214,6 @@ actual class NFCManager actual constructor() {
         } ?: run {
             scope.launch {
                 _cardState.emit(CardState.WaitingForTap)
-                _cardReadResults.emit(CardReadResult("", emptyList()))
             }
         }
     }
@@ -221,40 +221,35 @@ actual class NFCManager actual constructor() {
     private fun readFelicaCard(tag: Tag) {
         val nfcF = NfcF.get(tag)
         try {
+            requireNotNull(nfcF) { "This card does not support FeliCa" }
             nfcF.connect()
             val idm = ByteParser.toHexString(nfcF.tag.id)
             val transactions = nfcReader.readTransactionHistory(nfcF)
-            nfcF.close()
 
             scope.launch {
                 _cardReadResults.emit(CardReadResult(idm, transactions))
                 val latestBalance = transactions.firstOrNull()?.balance
-                latestBalance?.let {
-                    _cardState.emit(CardState.Balance(it))
-                } ?: run {
-                    _cardState.emit(CardState.Error("Balance not found. You moved the card too fast."))
-
+                if (latestBalance == null) {
+                    _cardState.emit(CardState.Error("No transaction records were available to read a balance from this card."))
+                } else {
+                    _cardState.emit(CardState.Balance(latestBalance))
                 }
             }
         } catch (e: Exception) {
             scope.launch {
                 _cardState.emit(CardState.Error(e.message ?: "Unknown error occurred"))
-                _cardReadResults.emit(CardReadResult("", emptyList()))
             }
+        } finally {
+            runCatching { if (nfcF?.isConnected == true) nfcF.close() }
         }
     }
 }
 
 @Composable
 actual fun getNFCManager(): NFCManager {
-    val context = LocalContext.current
-    DisposableEffect(Unit) {
-        val nfcManager = NFCManager()
-        // Setup NFC manager with context if needed
-
-        onDispose {
-            // Cleanup NFC resources if needed
-        }
+    val nfcManager = remember { NFCManager() }
+    DisposableEffect(nfcManager) {
+        onDispose { nfcManager.stopScan() }
     }
-    return NFCManager()
+    return nfcManager
 }

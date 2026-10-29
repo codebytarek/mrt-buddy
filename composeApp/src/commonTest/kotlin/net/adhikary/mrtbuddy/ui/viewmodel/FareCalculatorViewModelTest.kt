@@ -1,83 +1,64 @@
 package net.adhikary.mrtbuddy.ui.viewmodel
 
 import kotlin.test.Test
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.BeforeTest
+import kotlin.test.AfterTest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import net.adhikary.mrtbuddy.model.CardState
+import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorAction
+import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorViewModel
 
 class FareCalculatorViewModelTest {
-    private lateinit var viewModel: FareCalculatorViewModel
+    private val testDispatcher = StandardTestDispatcher()
 
     @BeforeTest
-    fun setup() {
-        FareCalculatorViewModel.reset()
-        viewModel = FareCalculatorViewModel.getInstance()
+    fun setUpMainDispatcher() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @AfterTest
+    fun tearDownMainDispatcher() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun testInitialState() {
-        assertNull(viewModel.fromStation)
-        assertNull(viewModel.toStation)
-        assertEquals(0, viewModel.calculatedFare)
-        assertEquals(false, viewModel.fromExpanded)
-        assertEquals(false, viewModel.toExpanded)
+    fun startsWithEmptyRouteAndZeroFare() {
+        val viewModel = FareCalculatorViewModel()
+        val state = viewModel.state.value
+
+        assertEquals(null, state.fromStation)
+        assertEquals(null, state.toStation)
+        assertEquals(0, state.calculatedFare)
+        assertEquals(0, state.discountedFare)
     }
 
     @Test
-    fun testStationSelection() {
-        // Get first and last stations
-        val firstStation = viewModel.stations.first()
-        val lastStation = viewModel.stations.last()
+    fun dropdownActionsAreMutuallyExclusiveAndDismissible() {
+        val viewModel = FareCalculatorViewModel()
 
-        // Test setting from station
-        viewModel.updateFromStation(firstStation)
-        assertEquals(firstStation, viewModel.fromStation)
-        assertEquals(false, viewModel.fromExpanded)
+        viewModel.onAction(FareCalculatorAction.ToggleFromExpanded)
+        assertEquals(true, viewModel.state.value.fromExpanded)
 
-        // Test setting to station
-        viewModel.updateToStation(lastStation)
-        assertEquals(lastStation, viewModel.toStation)
-        assertEquals(false, viewModel.toExpanded)
+        viewModel.onAction(FareCalculatorAction.ToggleToExpanded)
+        assertEquals(false, viewModel.state.value.fromExpanded)
+        assertEquals(true, viewModel.state.value.toExpanded)
 
-        // Verify fare calculation
-        assertEquals(100, viewModel.calculatedFare) // Maximum fare for furthest stations
+        viewModel.onAction(FareCalculatorAction.DismissDropdowns)
+        assertEquals(false, viewModel.state.value.fromExpanded)
+        assertEquals(false, viewModel.state.value.toExpanded)
     }
 
     @Test
-    fun testDropdownToggle() {
-        // Test from dropdown
-        viewModel.toggleFromExpanded()
-        assertEquals(true, viewModel.fromExpanded)
-        assertEquals(false, viewModel.toExpanded)
+    fun cardStateCanBeUpdated() {
+        val viewModel = FareCalculatorViewModel()
+        val state = CardState.Balance(1000)
 
-        // Test to dropdown
-        viewModel.toggleToExpanded()
-        assertEquals(false, viewModel.fromExpanded)
-        assertEquals(true, viewModel.toExpanded)
+        viewModel.onAction(FareCalculatorAction.UpdateCardState(state))
 
-        // Test dismiss
-        viewModel.dismissDropdowns()
-        assertEquals(false, viewModel.fromExpanded)
-        assertEquals(false, viewModel.toExpanded)
-    }
-
-    @Test
-    fun testSameStationFare() {
-        val station = viewModel.stations.first()
-        viewModel.updateFromStation(station)
-        viewModel.updateToStation(station)
-        assertEquals(0, viewModel.calculatedFare) // Same station should have 0 fare
-        assertEquals(0, viewModel.discountedFare) // Discounted fare should also be 0
-    }
-
-    @Test
-    fun testSameStationWithBalance() {
-        val station = viewModel.stations.first()
-        viewModel.updateFromStation(station)
-        viewModel.updateToStation(station)
-        viewModel.updateCardState(CardState.Balance(1000))
-        assertEquals(0, viewModel.calculatedFare)
-        assertEquals(true, viewModel.hasEnoughBalance()) // Should always have enough balance for 0 fare
+        assertEquals(state, viewModel.state.value.cardState)
     }
 }

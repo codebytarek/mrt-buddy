@@ -68,11 +68,13 @@ kotlin {
 
             implementation(libs.coil.compose)
             implementation(libs.zoomimage.compose.coil3)
+            implementation(libs.compottie)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(kotlin("test-common"))
             implementation(kotlin("test-annotations-common"))
+            implementation(libs.kotlinx.coroutine.test)
         }
     }
 }
@@ -85,8 +87,8 @@ android {
         applicationId = "net.adhikary.mrtbuddy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 27
-        versionName = "0.0.27"
+        versionCode = 29
+        versionName = "0.0.29"
     }
     packaging {
         resources {

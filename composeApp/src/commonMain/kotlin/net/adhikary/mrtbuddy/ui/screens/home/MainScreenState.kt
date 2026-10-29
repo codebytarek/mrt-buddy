@@ -3,6 +3,7 @@ package net.adhikary.mrtbuddy.ui.screens.home
 import net.adhikary.mrtbuddy.model.CardState
 import net.adhikary.mrtbuddy.model.Transaction
 import net.adhikary.mrtbuddy.model.TransactionWithAmount
+import net.adhikary.mrtbuddy.repository.DarkThemeConfig
 
 data class MainScreenState(
     val isLoading: Boolean = false,
@@ -11,6 +12,9 @@ data class MainScreenState(
     val cardName: String? = null,
     val transaction: List<Transaction> = emptyList(),
     val transactionWithAmount: List<TransactionWithAmount> = emptyList(),
+    val hasCurrentScanResult: Boolean = false,
+    val historyRevision: Int = 0,
     val error: String? = null,
-    val currentLanguage: String = "en"
+    val currentLanguage: String = "en",
+    val darkThemeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM
 )

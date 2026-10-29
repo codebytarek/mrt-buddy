@@ -12,3 +12,6 @@ actual fun getPlatform(): Platform = IOSPlatform()
 
 @OptIn(ExperimentalNativeApi::class)
 actual val isDebug: Boolean = kotlinPlatform.isDebugBinary
+
+@androidx.compose.runtime.Composable
+actual fun ConfigureSystemBars(darkTheme: Boolean) = Unit

@@ -10,7 +10,7 @@ actual fun MRTBuddyTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = if (darkTheme) darkScheme else lightScheme,
+        colorScheme = glassColorScheme(if (darkTheme) darkScheme else lightScheme),
         typography = Typography,
         content = content
     )

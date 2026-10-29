@@ -34,7 +34,8 @@ class MoreScreenViewModel(
                         val currentLanguage = settingsRepository.currentLanguage.value
                         _state.value = _state.value.copy(
                             autoSaveEnabled = autoSaveEnabled,
-                            currentLanguage = currentLanguage
+                            currentLanguage = currentLanguage,
+                            darkThemeConfig = settingsRepository.darkThemeConfig.value
                         )
                     } catch (e: Exception) {
                         _state.value = _state.value.copy(error = e.message)
@@ -69,6 +70,14 @@ class MoreScreenViewModel(
                     } catch (e: Exception) {
                         _events.send(MoreScreenEvent.Error(e.message ?: "Failed to change language"))
                     }
+                }
+            }
+
+            MoreScreenAction.CycleDarkTheme -> {
+                viewModelScope.launch {
+                    val next = _state.value.darkThemeConfig.next()
+                    settingsRepository.setDarkThemeConfig(next)
+                    _state.value = _state.value.copy(darkThemeConfig = next)
                 }
             }
 

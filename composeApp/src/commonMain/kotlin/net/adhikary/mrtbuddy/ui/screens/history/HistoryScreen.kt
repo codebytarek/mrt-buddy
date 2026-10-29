@@ -66,12 +66,13 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HistoryScreen(
     modifier: Modifier = Modifier,
     onCardSelected: (String) -> Unit,
+    refreshKey: Int = 0,
     viewModel: HistoryScreenViewModel = koinViewModel(),
 ) {
     val uiState = viewModel.state.collectAsState().value
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshKey) {
         viewModel.onAction(HistoryScreenAction.OnInit)
     }
 
@@ -159,7 +160,7 @@ fun HistoryScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize().then(modifier),
-        color = MaterialTheme.colorScheme.background
+        color = androidx.compose.ui.graphics.Color.Transparent
     ) {
         AnimatedVisibility(
             visible = true,

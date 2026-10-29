@@ -27,6 +27,7 @@
     <string name="tapRescanToStart">Tap 'Rescan' to start scanning</string>
     <!--    Main Page-->
     <string name="recentActivity">Recent Activity</string>
+    <string name="noTransactionsInCard">No journey records were available in this card scan. The card may expose no readable recent transactions.</string>
     <!--<string name="normalLowBalanceText">Recharge soon to enjoy seamless journeys!</string> -->
     <!-- <string name="normalBalanceText">Your balance can easily cover a few more trips.</string> -->
     <string name="deviceCompatibilityWarningTitle">Device Compatibility</string>
@@ -85,13 +86,7 @@
     <!--<string name="fareCalculateSuggestionText">Select stations above to calculate fare</string>-->
     <string name="journeyInformationLabel">Journey Information</string>
     <string name="journeyInformationDescription">Travel details and estimates</string>
-    <string name="route">Route</string>
     <string name="mrtCardDiscount">MRT Card Discount</string>
-    <string name="travelTipsLabel">Travel Tips</string>
-    <string name="travelTipsDescription">Smart commuting tips</string>
-    <string name="travelTips1">Use your MRT Pass for discounts and faster boarding</string>
-    <string name="travelTips2">Avoid peak hours (8–10 AM, 5–7 PM) for a more comfortable journey</string>
-    <string name="travelTips3">Check your card balance regularly to avoid delays</string>
 
 
 
@@ -102,7 +97,7 @@
     <string name="discount">Discount</string>
     <string name="yourBalance">Your balance is</string>
     <string name="tooLow">is too low.</string>
-    <string name="tapToCheckSufficientBalance">Tap your card to check if you have sufficient balance</string>
+    <string name="tapToCheckSufficientBalance">Tap your card to check if you have enough balance.</string>
     <string name="rescanToCheckSufficientBalance">Rescan your card to check if you have sufficient balance</string>
     <string name="selectStations">Select Stations</string>
     <string name="selectOrigin">Select origin station</string>
@@ -139,6 +134,11 @@
 
     <!-- Settings screen -->
     <string name="settings">Settings</string>
+    <string name="darkTheme">Appearance</string>
+    <string name="followSystem">System</string>
+    <string name="lightTheme">Light</string>
+    <string name="darkThemeEnabled">Dark</string>
+    <string name="selectThemeDescription">Choose system, light, or dark appearance</string>
     <string name="autoSaveCardDetails">Auto-save card details</string>
     <string name="autoSaveCardDetailsDescription">Automatically save card details when scanning</string>
     <string name="settingsAndMore">Settings &amp; More</string>

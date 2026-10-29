@@ -50,8 +50,8 @@ import mrtbuddy.composeapp.generated.resources.fareCalculatorDescription
 import mrtbuddy.composeapp.generated.resources.fareCalculatorText
 import net.adhikary.mrtbuddy.model.CardState
 import net.adhikary.mrtbuddy.ui.screens.components.FareDisplayCard
+import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.screens.components.StationSelectionSection
-import net.adhikary.mrtbuddy.ui.screens.components.QuickTipsCard
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -74,7 +74,6 @@ fun FareCalculatorScreen(
     )
     val contentAnimSpec = tween<androidx.compose.ui.unit.IntOffset>(360, delayMillis = 90)
     val infoAnimSpec = tween<androidx.compose.ui.unit.IntOffset>(360, delayMillis = 200)
-    val tipsAnimSpec = tween<androidx.compose.ui.unit.IntOffset>(360, delayMillis = 280)
     val fadeInAnimSpec = tween<Float>(420, delayMillis = 120)
     val scaleInAnimSpec = spring<Float>(
         dampingRatio = Spring.DampingRatioNoBouncy,
@@ -93,7 +92,6 @@ fun FareCalculatorScreen(
         viewModel.onAction(FareCalculatorAction.UpdateCardState(cardState))
     }
 
-    // Initialization
     LaunchedEffect(Unit) {
         viewModel.onAction(FareCalculatorAction.OnInit)
     }
@@ -112,7 +110,7 @@ fun FareCalculatorScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.Transparent)
     ) {
         LazyColumn(
             modifier = modifier.fillMaxSize(),
@@ -162,16 +160,6 @@ fun FareCalculatorScreen(
                 }
             }
 
-            // Tips
-            item(key = "tips") {
-                AnimatedVisibility(
-                    visible = contentVisible,
-                    enter = slideInVertically(initialOffsetY = { it / 4 }, animationSpec = tipsAnimSpec) + fadeIn(animationSpec = fadeInAnimSpec)
-                ) {
-                    QuickTipsCard()
-                }
-            }
-
             item(key = "bottomPad") {
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -186,22 +174,14 @@ private fun ModernHeader(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        modifier = modifier.fillMaxWidth().glassSurface(RoundedCornerShape(28.dp)),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.98f),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.88f)
-                        )
-                    )
-                ),
+                .fillMaxWidth(),
             color = Color.Transparent
         ) {
             // Horizontal layout: icon | title/desc (+ route) | status/actions
@@ -210,27 +190,34 @@ private fun ModernHeader(
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Icon only, no circular background
-                Icon(
-                    imageVector = Icons.Default.Calculate,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(40.dp)
-                )
+                Surface(
+                    modifier = Modifier.size(56.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.92f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Calculate,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
 
                 // Title + description
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(Res.string.fareCalculatorText),
-                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = stringResource(Res.string.fareCalculatorDescription),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.92f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2
                     )
                 }

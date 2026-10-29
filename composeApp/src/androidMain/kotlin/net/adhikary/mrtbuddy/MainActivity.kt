@@ -31,5 +31,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App(dynamicColor = true)
+    App(dynamicColor = false)
 }
