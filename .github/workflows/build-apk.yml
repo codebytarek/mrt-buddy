@@ -48,7 +48,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease --no-daemon
+        run: './gradlew :composeApp:assembleRelease :composeApp:bundleRelease --no-daemon'
 
       - name: Verify APK signature
         run: "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose composeApp/build/outputs/apk/release/composeApp-release.apk
