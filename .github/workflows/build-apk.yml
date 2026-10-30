@@ -8,8 +8,6 @@ on:
       - "composeApp/build.gradle.kts"
       - "CHANGELOG.md"
       - ".github/workflows/build-apk.yml"
-    tags:
-      - "v*"
   workflow_dispatch:
 
 permissions:
