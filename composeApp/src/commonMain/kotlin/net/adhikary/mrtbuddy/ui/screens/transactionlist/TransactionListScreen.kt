@@ -32,7 +32,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
@@ -513,7 +512,7 @@ fun TransactionSummaryCard(
                     modifier = Modifier.weight(1f),
                     iconPainter = painterResource(Res.drawable.spending_vector),
                     label = stringResource(Res.string.spent),
-                    value = "৳${translateNumber(totalSpent)}",
+                    value = "৳${translateNumber(kotlin.math.abs(totalSpent))}",
                     color = if (darkTheme) DarkNegativeRed else LightNegativeRed
                 )
                 if (currentBalance != null) {
@@ -700,22 +699,11 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                         )
                     }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Timeline,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = dateTimeFormatted,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
+                    Text(
+                        text = dateTimeFormatted,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
 
@@ -736,7 +724,7 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                             tint = amountColor
                         )
                         Text(
-                            text = "+$amountText",
+                            text = if (isRecharge) amountText else "+$amountText",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = amountColor

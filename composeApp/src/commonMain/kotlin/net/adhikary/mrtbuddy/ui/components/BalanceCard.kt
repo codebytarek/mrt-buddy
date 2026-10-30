@@ -389,7 +389,7 @@ private fun ModernBalanceContent(
                 if (isLowBalance) {
                     StatusAnimation(
                         resourcePath = "files/attention.json",
-                        size = 36.dp,
+                        size = 44.dp,
                         description = stringResource(Res.string.lowBalanceWarning),
                         accent = lowBalanceOrange,
                         fallback = Icons.Default.Warning

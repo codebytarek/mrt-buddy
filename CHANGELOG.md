@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.33
+
+- Removed the recharge plus sign, transaction timestamp icons, and minus sign from the spent summary total.
+- Enlarged the low-balance warning indicator for better visibility.
+- Updated the card placement instruction in English and Bengali.
+
 ## v0.0.32
 
 - Evenly spaced Card Summary metrics and improved the transaction summary header on narrow screens.

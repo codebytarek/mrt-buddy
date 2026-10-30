@@ -19,7 +19,7 @@
     <string name="quickSetupGuideText3">3. Return to this app and try again</string>
     <string name="readingCard">Reading card...</string>
     <string name="keepCardSteady">Please keep your card steady</string>
-    <string name="hold">Hold your card behind your phone\nto read the balance</string>
+    <string name="hold">Place your card against the back of your phone</string>
     <string name="noNfcSupport">NFC Not Supported</string>
     <string name="requiredNfc">This device doesn't support NFC, which is required to read your MRT Pass card.</string>
     <string name="nfcDisabled">NFC disabled</string>
