@@ -103,6 +103,7 @@ import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightNegativeRed
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -647,20 +648,24 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = if (!isRecharge) {
-                            "${StationService.translate(transaction.fromStation)} → ${
-                                StationService.translate(transaction.toStation)
-                            }"
-                        } else {
-                            stringResource(Res.string.recharge)
-                        },
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    if (!isRecharge) {
+                        StationRouteText(
+                            from = StationService.translate(transaction.fromStation),
+                            to = StationService.translate(transaction.toStation),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(Res.string.recharge),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

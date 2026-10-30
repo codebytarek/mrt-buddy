@@ -123,13 +123,19 @@ fun TransactionItem(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = if (!isRecharge)
-                    "${StationService.translate(fromStation)} → ${StationService.translate(toStation)}"
-                else stringResource(Res.string.recharge),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            if (!isRecharge) {
+                StationRouteText(
+                    from = StationService.translate(fromStation),
+                    to = StationService.translate(toStation),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(
+                    text = stringResource(Res.string.recharge),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = TimestampService.formatDateTime(date),

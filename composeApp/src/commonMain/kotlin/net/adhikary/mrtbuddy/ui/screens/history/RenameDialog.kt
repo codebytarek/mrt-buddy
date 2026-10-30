@@ -43,7 +43,7 @@ import mrtbuddy.composeapp.generated.resources.cardNameTooLongError
 import mrtbuddy.composeapp.generated.resources.cardName
 import mrtbuddy.composeapp.generated.resources.charactersCount
 import net.adhikary.mrtbuddy.translateNumber
-import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -85,7 +85,7 @@ fun RenameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = Modifier.glassSurface(RoundedCornerShape(20.dp)),
+        modifier = Modifier.navigationGlassSurface(RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
         tonalElevation = 0.dp,

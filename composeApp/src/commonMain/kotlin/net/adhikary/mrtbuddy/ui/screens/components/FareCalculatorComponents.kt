@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.components.StaticNfcIcon
+import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import androidx.compose.ui.Alignment
 import net.adhikary.mrtbuddy.getPlatform
 import net.adhikary.mrtbuddy.localizedNfcErrorMessage
@@ -384,11 +385,13 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
                     ) {
                         // Header
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(text = stringResource(Res.string.fareInvoice), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                                 if (uiState.fromStation != null || uiState.toStation != null) {
-                                    Text(
-                                        text = "${uiState.fromStation?.let { StationService.translate(it.name) } ?: "-"} → ${uiState.toStation?.let { StationService.translate(it.name) } ?: "-"}",
+                                    StationRouteText(
+                                        from = uiState.fromStation?.let { StationService.translate(it.name) } ?: "-",
+                                        to = uiState.toStation?.let { StationService.translate(it.name) } ?: "-",
+                                        arrowSize = 14.dp,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
@@ -471,9 +474,9 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
                  }
 
                 is CardState.Reading -> {
-                    // show reading spinner and prompt
+                    // Keep a static NFC mark visible during the brief card-reading state.
                     Column(modifier = Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.primary)
+                        StaticNfcIcon(size = 40.dp)
                         Text(text = stringResource(Res.string.tapToCheckSufficientBalance), style = MaterialTheme.typography.bodyMedium)
                     }
                 }

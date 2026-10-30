@@ -2,6 +2,9 @@
 
 ## v0.0.30
 
+- Removed the success check icon from the current balance display while keeping the amount centered.
+- Refined saved-card history refresh and state restoration when returning to the app.
+- Improved English and Bengali text consistency, station route spacing, and scalable navigation/NFC icons.
 - Localized the NFC “Tag was lost” error as “Card removed too soon” in English and “কার্ডটি দ্রুত সরিয়ে নিয়েছেন” in Bengali.
 - Kept saved cards observable across tab navigation and improved the History loading state.
 - Refined the shared Liquid Glass bottom navigation and card surfaces, including content scrolling behind the navigation bar.

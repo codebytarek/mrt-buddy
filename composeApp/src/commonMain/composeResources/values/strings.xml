@@ -6,13 +6,13 @@
     <string name="historyTab">History</string>
     <string name="language">Language</string>
     <string name="rescan">Rescan</string>
-    <string name="latestBalance">Latest Balance</string>
-    <string name="lowBalance">Oops! You’ll need to top up before your next journey.</string>
+    <string name="latestBalance">Current Balance</string>
+    <string name="lowBalance">Your balance is low. Top up before your next journey.</string>
     <string name="tap">Tap Your Card</string>
     <string name="tips">Tips</string>
-    <string name="tipsText">Hold your card near the NFC area and keep it steady to scan.</string>
+    <string name="tipsText">Hold your card near the NFC area and keep it steady while scanning.</string>
     <string name="nfcDisabledText">NFC is Disabled</string>
-    <string name="nfcEnableText">Please enable NFC in your device settings to scan the cards.</string>
+    <string name="nfcEnableText">Please enable NFC in your device settings to scan your card.</string>
     <string name="quickSetupGuideText">Quick Setup Guide</string>
     <string name="quickSetupGuideText1">1. Go to Settings</string>
     <string name="quickSetupGuideText2">2. Find and enable NFC</string>
@@ -21,21 +21,23 @@
     <string name="keepCardSteady">Please keep your card steady</string>
     <string name="hold">Hold your card behind your phone\nto read the balance</string>
     <string name="noNfcSupport">NFC Not Supported</string>
-    <string name="requiredNfc">This device doesn't support NFC, which is required to read your MRT Pass</string>
+    <string name="requiredNfc">This device doesn't support NFC, which is required to read your MRT Pass card.</string>
     <string name="nfcDisabled">NFC disabled</string>
-    <string name="enableNfc">Please enable NFC in your device settings to read your MRT Pass</string>
-    <string name="tapRescanToStart">Tap 'Rescan' to start scanning</string>
-    <!--    Main Page-->
+    <string name="enableNfc">Please enable NFC in your device settings to read your MRT Pass.</string>
+    <string name="tapRescanToStart">Tap “Rescan” to scan again.</string>
+
+    <!-- Main Page -->
     <string name="recentActivity">Recent Activity</string>
-    <string name="noTransactionsInCard">No journey records were available in this card scan. The card may expose no readable recent transactions.</string>
-    <!--<string name="normalLowBalanceText">Recharge soon to enjoy seamless journeys!</string> -->
-    <!-- <string name="normalBalanceText">Your balance can easily cover a few more trips.</string> -->
+    <string name="noTransactionsInCard">No journey records were found. This card may not provide readable transaction history.</string>
+    <!--<string name="normalLowBalanceText">Recharge soon to enjoy seamless journeys!</string>-->
+    <!--<string name="normalBalanceText">Your balance can easily cover a few more trips.</string>-->
     <string name="deviceCompatibilityWarningTitle">Device Compatibility</string>
-    <string name="deviceCompatibilityWarningText">This device doesn't support NFC functionality required for card scanning. You'll need a different device with NFC capability.</string>
+    <string name="deviceCompatibilityWarningText">This device doesn't support NFC, which is required to scan cards. Please use an NFC-enabled device.</string>
     <string name="scanFailed">Scan Failed</string>
     <string name="cardRemovedTooSoon">Card removed too soon</string>
-    <string name="scanFailedText1">Balance not found. You moved the card too fast.</string>
-    <!-- transaction histories -->
+    <string name="scanFailedText1">Couldn't read the balance. The card was removed too soon.</string>
+
+    <!-- Transaction histories -->
     <string name="recentJourneys">Recent Journeys</string>
     <string name="balanceUpdate">Balance Update</string>
     <string name="kamalapur">Kamalapur</string>
@@ -56,13 +58,12 @@
     <string name="uttaraCenter">Uttara Center</string>
     <string name="uttaraNorth">Uttara North</string>
     <string name="recharge">Recharge</string>
-    <string name="topup">Recharge</string>
+    <string name="topup">Top-up</string>
     <string name="diabari">Dhaka Metro Rail Depot, Diabari</string>
     <string name="transactionSummary">Transaction Summary</string>
     <string name="journeys">Journeys</string>
     <string name="added">Top-ups</string>
     <string name="spent">Spent</string>
-
 
     <string name="jan">Jan</string>
     <string name="feb">Feb</string>
@@ -77,7 +78,7 @@
     <string name="nov">Nov</string>
     <string name="dec">Dec</string>
 
-    <!-- fare calculator-->
+    <!-- Fare calculator -->
     <string name="fareCalculatorText">MRT Fare Calculator</string>
     <string name="fareCalculatorDescription">Plan your journey • Check fares • Track balance</string>
     <string name="selectRouteText">Select Route</string>
@@ -86,26 +87,24 @@
     <string name="toStationLabel">To</string>
     <!--<string name="fareCalculateSuggestionText">Select stations above to calculate fare</string>-->
     <string name="journeyInformationLabel">Journey Information</string>
-    <string name="journeyInformationDescription">Travel details and estimates</string>
+    <string name="journeyInformationDescription">Journey details and fare estimates</string>
     <string name="mrtCardDiscount">MRT Card Discount</string>
 
-
-
     <string name="selectStation">Select Stations</string>
-    <string name="chooseOrgDest">Choose origin and destination stations to calculate fare</string>
+    <string name="chooseOrgDest">Choose your starting and destination stations to calculate the fare.</string>
     <string name="withMRT">With MRT/Rapid Pass</string>
     <string name="singleTicket">Single Ticket</string>
     <string name="discount">Discount</string>
-    <string name="yourBalance">Your balance is</string>
+    <string name="yourBalance">Your balance</string>
     <string name="tooLow">is too low.</string>
     <string name="tapToCheckSufficientBalance">Tap your card to check if you have enough balance.</string>
-    <string name="rescanToCheckSufficientBalance">Rescan your card to check if you have sufficient balance</string>
+    <string name="rescanToCheckSufficientBalance">Rescan your card to check whether you have enough balance.</string>
     <string name="selectStations">Select Stations</string>
     <string name="selectOrigin">Select origin station</string>
     <string name="selectDestination">Select destination station</string>
     <string name="roundTrips">x Round Trip(s)</string>
     <string name="balanceAmount">Balance</string>
-    <string name="need_more_amount">Need ৳ %s more</string>
+    <string name="need_more_amount">৳ %s more needed</string>
     <string name="amount">Amount</string>
     <string name="recharges">Recharges</string>
     <string name="welcomeBack">Welcome back</string>
@@ -113,29 +112,29 @@
     <string name="notAvailable">N/A</string>
     <string name="cardsCount">%1$s cards found</string>
     <string name="lowBalanceCount">%1$s low balance</string>
-    <string name="fareInvoice">Fare Invoice</string>
+    <string name="fareInvoice">Fare Breakdown</string>
     <string name="summary">Summary</string>
     <string name="invoice">Invoice</string>
     <string name="baseFare">Base Fare</string>
     <string name="passDiscount">MRT / Rapid Pass Discount</string>
     <string name="total">Total</string>
-    <string name="currentBalance">Current balance</string>
+    <string name="currentBalance">Current Balance</string>
     <string name="sufficient">Sufficient</string>
     <string name="insufficient">Insufficient</string>
-    <string name="insufficientBalanceMessage">Insufficient balance to cover this trip. Please top up your card to complete your journey.</string>
+    <string name="insufficientBalanceMessage">Insufficient balance for this trip. Please top up your card before travelling.</string>
     <string name="loadingCards">Loading your cards...</string>
-    <string name="loadingCardsDescription">Please wait while we fetch your card information</string>
+    <string name="loadingCardsDescription">Please wait while we fetch your card information.</string>
     <string name="loadingTransactions">Loading transactions...</string>
-    <string name="loadingTransactionsDescription">Please wait while we fetch your transaction history</string>
+    <string name="loadingTransactionsDescription">Please wait while we fetch your transaction history.</string>
     <string name="somethingWentWrong">Something went wrong</string>
     <string name="tryAgain">Try Again</string>
-    <string name="deleteCardHistoryWarning">This action cannot be undone. All transaction history for this card will be permanently removed.</string>
+    <string name="deleteCardHistoryWarning">This action cannot be undone. All transaction history for this card will be permanently deleted.</string>
     <string name="yourCards">Your Cards</string>
-    <string name="lowBalanceWarning">Low balance warning</string>
-    <string name="renameCardDescription">Give your card a memorable name to easily identify it among your collection.</string>
-    <string name="cardNamePlaceholder">e.g. Home Card, Office Card, Personal</string>
+    <string name="lowBalanceWarning">Low Balance Warning</string>
+    <string name="renameCardDescription">Give your card a name to easily identify it.</string>
+    <string name="cardNamePlaceholder">e.g. Home, Office, Personal</string>
     <string name="cardNameEmptyError">Card name cannot be empty</string>
-    <string name="cardNameTooLongError">Card name must be 30 characters or less</string>
+    <string name="cardNameTooLongError">Card name must be 30 characters or fewer</string>
     <string name="charactersCount">%1$s/30 characters</string>
     <string name="moreOptions">More options</string>
     <string name="critical">CRITICAL</string>
@@ -148,40 +147,41 @@
     <string name="cardIdLabel">CARD ID</string>
     <string name="lastScanLabel">LAST SCAN</string>
     <string name="quickTip">💡 Quick Tip</string>
-    <string name="transactionsEmptyTip">Start using your card for MRT journeys or balance top-ups. All your transactions will appear here with detailed information.</string>
+    <string name="transactionsEmptyTip">Your transactions will appear here when you use your card for MRT journeys or top-ups.</string>
     <string name="back">Back</string>
     <string name="balanceWithAmount">Balance: ৳ %1$s</string>
     <string name="scanningProgress">⚡ Scanning in progress...</string>
     <string name="nfcAnimationDescription">NFC card scanning animation</string>
+    <string name="nfcIconDescription">NFC symbol shown while scanning a card</string>
     <string name="errorDescription">Error</string>
     <string name="noNfcDescription">No NFC</string>
     <string name="nfcDisabledDescription">NFC Disabled</string>
     <string name="addedAccessibility">Added</string>
     <string name="spentAccessibility">Spent</string>
-    <string name="cardIdentifierError">The card scan did not provide a card identifier.</string>
-    <string name="saveHistoryError">Could not save or load this card's history.</string>
+    <string name="cardIdentifierError">The scan did not return a card identifier.</string>
+    <string name="saveHistoryError">Couldn't save or load this card's history.</string>
     <string name="rapidPassCard">Rapid Pass Card</string>
     <string name="mrtPassCard">MRT Pass Card</string>
 
-    <!-- more screen -->
+    <!-- More screen -->
     <string name="aboutHeader">About</string>
     <string name="privacyPolicy">Privacy Policy</string>
     <string name="helpAndSupportButton">Help and Support</string>
-    <string name="nonAffiliationDisclaimer">This is an independent project and is not officially endorsed by or affiliated with Dhaka Mass Transit Company Limited (DMTCL).</string>
-    <string name="readOnlyDisclaimer">The app is designed solely for reading card information and does not support recharging, topping up, or modifying card balances.</string>
+    <string name="nonAffiliationDisclaimer">This is an independent project and is not affiliated with or endorsed by Dhaka Mass Transit Company Limited (DMTCL).</string>
+    <string name="readOnlyDisclaimer">This app only reads card information. It cannot recharge cards or modify their balances.</string>
 
     <!-- History and Transaction screens -->
     <string name="transactions">Transactions</string>
     <string name="history">History</string>
     <string name="noCardsFound">No cards found</string>
-    <string name="historyLoadError">Could not load this card history. Please try again.</string>
-    <string name="renameCardError">Could not rename this card. Please try again.</string>
-    <string name="deleteCardError">Could not delete this card. Please try again.</string>
+    <string name="historyLoadError">Couldn't load this card's history. Please try again.</string>
+    <string name="renameCardError">Couldn't rename this card. Please try again.</string>
+    <string name="deleteCardError">Couldn't delete this card. Please try again.</string>
     <string name="cardRenamed">Card name updated.</string>
     <string name="cardDeleted">Card deleted.</string>
-    <string name="scanCardPrompt">Scan a card in the Balance Tab to get started.\n\nCome back here afterwards.</string>
+    <string name="scanCardPrompt">Scan a card in the Balance tab to get started.\n\nCome back here afterwards.</string>
     <string name="noTransactionsFound">No transactions found</string>
-    <string name="transactionsAppearPrompt">Transactions will appear here after you use your card at least twice.</string>
+    <string name="transactionsAppearPrompt">Your transactions will appear here after your card has been scanned at least twice.</string>
     <string name="loading">Loading...</string>
     <string name="deleteCard">Delete Card</string>
     <string name="deleteCardConfirm">Are you sure you want to delete this card? This action cannot be undone.</string>
@@ -200,18 +200,17 @@
     <string name="followSystem">System</string>
     <string name="lightTheme">Light</string>
     <string name="darkThemeEnabled">Dark</string>
-    <string name="selectThemeDescription">Choose system, light, or dark appearance</string>
+    <string name="selectThemeDescription">Choose between system, light, and dark themes.</string>
     <string name="autoSaveCardDetails">Auto-save card details</string>
-    <string name="autoSaveCardDetailsDescription">Automatically save card details when scanning</string>
+    <string name="autoSaveCardDetailsDescription">Automatically save card details when scanning.</string>
     <string name="settingsAndMore">Settings &amp; More</string>
-    <string name="settingsAndMoreDescription">Personalize your MRT experience</string>
-    <string name="selectLanguageDescription">English এবং বাংলার মধ্যে পরিবর্তন করুন</string>
-    <string name="metroStationMapDescription">View the complete metro rail network map</string>
-    <string name="privacyPolicyDescription">Read our privacy policy and data handling practices</string>
-    <string name="getHelpDescription">Get help and support for using the app</string>
-    <string name="contributorsDescription">Meet the people who made this app possible</string>
-    <string name="openSourceLicensesDescription">View licenses for third-party libraries used</string>
-
+    <string name="settingsAndMoreDescription">Personalize your MRT Buddy experience.</string>
+    <string name="selectLanguageDescription">Switch between English and Bengali.</string>
+    <string name="metroStationMapDescription">View the complete metro rail network map.</string>
+    <string name="privacyPolicyDescription">Read our privacy policy and data handling practices.</string>
+    <string name="getHelpDescription">Get help and support with using the app.</string>
+    <string name="contributorsDescription">Meet the people who made this app possible.</string>
+    <string name="openSourceLicensesDescription">View the licenses for third-party libraries used in this app.</string>
 
     <!-- Others screen -->
     <string name="others">Others</string>
@@ -232,11 +231,11 @@
     <string name="yearsAgo">years ago</string>
     <string name="contributors">Contributors</string>
     <string name="openSourceLicenses">Open Source Licenses</string>
-    <string name="chooseStationAccessibility">Choose %s station</string>
+    <string name="chooseStationAccessibility">Select %s station</string>
     <string name="builtWith">Built with ❤️ by Ani and friends</string>
     <string name="copyright">Copyright © 2024 Aniruddha Adhikary.</string>
     <string name="unknown">Unknown</string>
-    <string name="unknownScanError">Unknown error occurred</string>
+    <string name="unknownScanError">An unknown error occurred.</string>
     <string name="unknownStation">Unknown station (%s)</string>
     <string name="am">AM</string>
     <string name="pm">PM</string>

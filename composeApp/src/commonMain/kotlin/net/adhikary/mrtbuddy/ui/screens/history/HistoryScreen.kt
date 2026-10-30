@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +54,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.cancel
 import mrtbuddy.composeapp.generated.resources.delete
@@ -92,6 +96,7 @@ fun HistoryScreen(
     val uiState = viewModel.state.collectAsState().value
     val listState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val loadErrorText = stringResource(Res.string.historyLoadError)
     val renameErrorText = stringResource(Res.string.renameCardError)
@@ -101,6 +106,22 @@ fun HistoryScreen(
 
     LaunchedEffect(viewModel, refreshKey) {
         if (refreshKey) viewModel.onAction(HistoryScreenAction.OnInit)
+    }
+
+    DisposableEffect(viewModel, lifecycleOwner, refreshKey) {
+        if (!refreshKey) return@DisposableEffect onDispose { }
+
+        var leftForeground = false
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                leftForeground = true
+            } else if (event == Lifecycle.Event.ON_RESUME && leftForeground) {
+                leftForeground = false
+                viewModel.onAction(HistoryScreenAction.OnInit)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, renameSuccessText, deleteSuccessText) {

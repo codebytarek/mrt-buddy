@@ -7,7 +7,7 @@ import mrtbuddy.composeapp.generated.resources.apps
 import mrtbuddy.composeapp.generated.resources.calculate
 import mrtbuddy.composeapp.generated.resources.card
 import mrtbuddy.composeapp.generated.resources.history
-import mrtbuddy.composeapp.generated.resources.more_menu
+import mrtbuddy.composeapp.generated.resources.ic_more_menu
 import mrtbuddy.composeapp.generated.resources.fare
 import mrtbuddy.composeapp.generated.resources.balance
 import mrtbuddy.composeapp.generated.resources.more
@@ -34,7 +34,7 @@ public fun CardIcon() {
 @Composable
 public fun AppsIcon() {
     return Icon(
-        painter = painterResource(Res.drawable.more_menu),
+        painter = painterResource(Res.drawable.ic_more_menu),
         contentDescription = stringResource(Res.string.more)
     )
 }

@@ -37,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,6 +77,7 @@ import net.adhikary.mrtbuddy.ui.components.BalanceCard
 import net.adhikary.mrtbuddy.ui.components.CalculatorIcon
 import net.adhikary.mrtbuddy.ui.components.CardIcon
 import net.adhikary.mrtbuddy.ui.components.HistoryIcon
+import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
@@ -120,7 +122,7 @@ fun MainScreen(
         val currentScreen = Screen.valueOf(
             backStackEntry?.destination?.route ?: Screen.Home.name
         )
-        var selectedCardIdm by remember { mutableStateOf<String?>(null) }
+        var selectedCardIdm by rememberSaveable { mutableStateOf<String?>(null) }
         val hasTransactions = uiState.hasVisibleCurrentScanHistory
 
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
@@ -546,24 +548,28 @@ private fun ModernTransactionItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (TransactionType.isRecharge(
+                val isRecharge = TransactionType.isRecharge(
                             transaction.transaction.fixedHeader,
                             transaction.transaction.fromStation,
                             transaction.transaction.toStation
                         )
-                    ) {
-                        stringResource(Res.string.recharge)
-                    } else if (transaction.transaction.fromStation.isNotEmpty())
-                        "${StationService.translate(transaction.transaction.fromStation)} → ${
-                            StationService.translate(transaction.transaction.toStation)
-                        }"
-                    else stringResource(Res.string.recharge),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                if (!isRecharge && transaction.transaction.fromStation.isNotEmpty()) {
+                    StationRouteText(
+                        from = StationService.translate(transaction.transaction.fromStation),
+                        to = StationService.translate(transaction.transaction.toStation),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                } else {
+                    Text(
+                        text = stringResource(Res.string.recharge),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 Row(
                     modifier = Modifier.padding(top = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,

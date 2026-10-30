@@ -30,15 +30,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Contactless
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Contactless
 import androidx.compose.material.icons.rounded.WbIncandescent
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -81,6 +78,8 @@ import mrtbuddy.composeapp.generated.resources.rapidPassCard
 import mrtbuddy.composeapp.generated.resources.mrtPassCard
 import mrtbuddy.composeapp.generated.resources.scanningProgress
 import mrtbuddy.composeapp.generated.resources.nfcAnimationDescription
+import mrtbuddy.composeapp.generated.resources.nfcIconDescription
+import mrtbuddy.composeapp.generated.resources.nfc_static
 import mrtbuddy.composeapp.generated.resources.errorDescription
 import mrtbuddy.composeapp.generated.resources.noNfcDescription
 import mrtbuddy.composeapp.generated.resources.nfcDisabledDescription
@@ -89,6 +88,7 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.LottieConstants
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 import mrtbuddy.composeapp.generated.resources.latestBalance
 import mrtbuddy.composeapp.generated.resources.lowBalance
 import mrtbuddy.composeapp.generated.resources.nfcDisabledText
@@ -328,22 +328,16 @@ private fun ModernBalanceContent(
             )
         }
 
-        // Modern balance display with enhanced status indication
-        val (balanceColor, balanceIcon) = when {
-            amount <= 20 -> Pair(
-                MaterialTheme.colorScheme.error,
-                Icons.Default.Warning
-            )
-
-            amount <= 70 -> Pair(
-                if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L,
-                Icons.Default.Info
-            )
-
-            else -> Pair(
-                MaterialTheme.colorScheme.primary,
-                Icons.Default.CheckCircle
-            )
+        // Keep warning indicators for low balances; a sufficient balance needs no check icon.
+        val balanceColor = when {
+            amount <= 20 -> MaterialTheme.colorScheme.error
+            amount <= 70 -> if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L
+            else -> MaterialTheme.colorScheme.primary
+        }
+        val balanceIcon = when {
+            amount <= 20 -> Icons.Default.Warning
+            amount <= 70 -> Icons.Default.Info
+            else -> null
         }
 
         Box(
@@ -356,12 +350,14 @@ private fun ModernBalanceContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = balanceIcon,
-                    contentDescription = null,
-                    tint = balanceColor,
-                    modifier = Modifier.size(32.dp)
-                )
+                balanceIcon?.let { icon ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = balanceColor,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
 
                 Text(
                     text = "৳ ${translateNumber(amount)}",
@@ -413,7 +409,7 @@ private fun ModernBalanceContent(
 
 @Composable
 @OptIn(ExperimentalResourceApi::class)
-private fun NfcReadingAnimation(size: Dp = 172.dp) {
+internal fun NfcReadingAnimation(size: Dp = 172.dp) {
     val animationDescription = stringResource(Res.string.nfcAnimationDescription)
     val foreground = MaterialTheme.colorScheme.onSurface
     val surface = MaterialTheme.colorScheme.surface
@@ -460,14 +456,7 @@ private fun NfcReadingAnimation(size: Dp = 172.dp) {
             .semantics { contentDescription = animationDescription },
         contentAlignment = Alignment.Center
     ) {
-        if (json == null) {
-            Icon(
-                imageVector = Icons.Default.Contactless,
-                contentDescription = null,
-                modifier = Modifier.size(size * 0.5f),
-                tint = foreground
-            )
-        } else {
+        if (json != null) {
             val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
             composition?.let {
                 LottieAnimation(
@@ -475,14 +464,19 @@ private fun NfcReadingAnimation(size: Dp = 172.dp) {
                     iterations = LottieConstants.IterateForever,
                     modifier = Modifier.size(size)
                 )
-            } ?: Icon(
-            imageVector = Icons.Default.Contactless,
-            contentDescription = null,
-            modifier = Modifier.size(size * 0.5f),
-            tint = foreground
-            )
+            }
         }
     }
+}
+
+@Composable
+internal fun StaticNfcIcon(size: Dp = 72.dp) {
+    Icon(
+        painter = painterResource(Res.drawable.nfc_static),
+        contentDescription = stringResource(Res.string.nfcIconDescription),
+        modifier = Modifier.size(size),
+        tint = MaterialTheme.colorScheme.onSurface
+    )
 }
 
 @Composable
@@ -492,7 +486,7 @@ private fun ModernReadingContent() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        NfcReadingAnimation()
+        StaticNfcIcon()
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

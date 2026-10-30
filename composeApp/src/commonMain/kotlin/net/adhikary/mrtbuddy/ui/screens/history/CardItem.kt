@@ -573,9 +573,11 @@ fun CardItem(
                 ),
                 color = Color.White.copy(alpha = 0.08f),
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp)
-                    .rotate(-90f)
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 18.dp)
+                    .rotate(-90f),
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

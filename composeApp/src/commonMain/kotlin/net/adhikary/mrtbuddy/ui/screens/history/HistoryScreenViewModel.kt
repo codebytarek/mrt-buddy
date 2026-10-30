@@ -43,7 +43,7 @@ class HistoryScreenViewModel(
     fun onAction(action: HistoryScreenAction) {
         when (action) {
             HistoryScreenAction.OnInit,
-            HistoryScreenAction.OnCardAdded -> observeCards()
+            HistoryScreenAction.OnCardAdded -> observeCards(restart = true)
 
             is HistoryScreenAction.RenameCard -> viewModelScope.launch {
                 try {
@@ -69,10 +69,12 @@ class HistoryScreenViewModel(
         }
     }
 
-    private fun observeCards() {
-        // Re-entering History should not cancel a healthy collector. Restart only after
-        // a completed/failed collection or an explicit retry.
-        if (observeJob?.isActive == true) return
+    private fun observeCards(restart: Boolean = false) {
+        // Re-subscribing forces Room to run a fresh query after returning from system
+        // settings or recreating the Activity for a configuration change. Keep the
+        // current rows visible during that refresh instead of resetting to empty.
+        if (!restart && observeJob?.isActive == true) return
+        observeJob?.cancel()
         observeJob = viewModelScope.launch {
             transactionRepository.observeCardsWithLatestBalance()
                 .onStart {
