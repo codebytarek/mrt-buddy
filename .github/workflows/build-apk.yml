@@ -2,12 +2,8 @@ name: Production Release
 
 on:
   push:
-    branches:
-      - master
-    paths:
-      - "composeApp/build.gradle.kts"
-      - "CHANGELOG.md"
-      - ".github/workflows/build-apk.yml"
+    tags:
+      - "v*"
   workflow_dispatch:
 
 permissions:
