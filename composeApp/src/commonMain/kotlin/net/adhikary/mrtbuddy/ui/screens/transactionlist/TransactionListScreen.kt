@@ -29,10 +29,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.TrendingDown
@@ -61,6 +59,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -93,6 +92,10 @@ import mrtbuddy.composeapp.generated.resources.transactionsAppearPrompt
 import mrtbuddy.composeapp.generated.resources.transactionsEmptyTip
 import mrtbuddy.composeapp.generated.resources.tryAgain
 import mrtbuddy.composeapp.generated.resources.unnamedCard
+import mrtbuddy.composeapp.generated.resources.bengali_taka
+import mrtbuddy.composeapp.generated.resources.calculator_vector
+import mrtbuddy.composeapp.generated.resources.spending_vector
+import mrtbuddy.composeapp.generated.resources.taka_wallet
 import net.adhikary.mrtbuddy.data.TransactionEntityWithAmount
 import net.adhikary.mrtbuddy.model.TransactionType
 import net.adhikary.mrtbuddy.nfc.service.StationService
@@ -105,6 +108,7 @@ import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -486,26 +490,26 @@ fun TransactionSummaryCard(
                     color = MaterialTheme.colorScheme.primary
                 )
                 SummaryItem(
-                    icon = Icons.Default.MonetizationOn,
+                    iconPainter = painterResource(Res.drawable.bengali_taka),
                     label = stringResource(Res.string.recharges),
                     value = translateNumber(rechargeTransactions.size),
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
-                    icon = Icons.Default.TrendingUp,
+                    iconPainter = painterResource(Res.drawable.calculator_vector),
                     label = stringResource(Res.string.amount),
                     value = "৳${translateNumber(totalAdded)}",
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
-                    icon = Icons.Default.TrendingDown,
+                    iconPainter = painterResource(Res.drawable.spending_vector),
                     label = stringResource(Res.string.spent),
                     value = "৳${translateNumber(totalSpent)}",
                     color = if (darkTheme) DarkNegativeRed else LightNegativeRed
                 )
                 if (currentBalance != null) {
                     SummaryItem(
-                        icon = Icons.Default.AccountBalanceWallet,
+                        iconPainter = painterResource(Res.drawable.taka_wallet),
                         label = stringResource(Res.string.balance),
                         value = "৳${translateNumber(currentBalance)}",
                         color = MaterialTheme.colorScheme.secondary
@@ -518,7 +522,8 @@ fun TransactionSummaryCard(
 
 @Composable
 fun SummaryItem(
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    iconPainter: Painter? = null,
     label: String,
     value: String,
     color: Color
@@ -534,12 +539,21 @@ fun SummaryItem(
                 .background(color.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(24.dp)
-            )
+            if (iconPainter != null) {
+                Icon(
+                    painter = iconPainter,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -628,20 +642,21 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = if (isRecharge) {
-                            Icons.Default.TrendingUp
-                        } else {
-                            Icons.Default.DirectionsTransit
-                        },
-                        contentDescription = null,
-                        tint = if (isRecharge) {
-                            if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        },
-                        modifier = Modifier.size(24.dp)
-                    )
+                    if (isRecharge) {
+                        Icon(
+                            painter = painterResource(Res.drawable.bengali_taka),
+                            contentDescription = null,
+                            tint = if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.DirectionsTransit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
                 Column(
@@ -741,3 +756,4 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
         }
     }
 }
+

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Refresh
@@ -58,7 +57,9 @@ import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorAction
 import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorState
 import net.adhikary.mrtbuddy.ui.screens.farecalculator.FareCalculatorViewModel
 import mrtbuddy.composeapp.generated.resources.Res
+import mrtbuddy.composeapp.generated.resources.taka_wallet
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.painterResource
 import androidx.compose.foundation.layout.Column
 import mrtbuddy.composeapp.generated.resources.fromStationLabel
 import mrtbuddy.composeapp.generated.resources.journeyInformationDescription
@@ -435,7 +436,7 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
                         // Professional balance panel: icon + balance + status chip
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.AccountBalanceWallet, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                Icon(painter = painterResource(Res.drawable.taka_wallet), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(text = stringResource(Res.string.currentBalance), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
@@ -500,3 +501,4 @@ fun FareDisplayCard(uiState: FareCalculatorState, viewModel: FareCalculatorViewM
         }
     }
 }
+

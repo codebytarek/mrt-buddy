@@ -88,8 +88,8 @@ android {
         applicationId = "net.adhikary.mrtbuddy"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 30
-        versionName = "0.0.30"
+        versionCode = 31
+        versionName = "0.0.31"
     }
     packaging {
         resources {
@@ -197,3 +197,4 @@ tasks.register("copyLicenseReportToAssets") {
 tasks.named("preBuild").configure {
     dependsOn("copyLicenseReportToAssets")
 }
+

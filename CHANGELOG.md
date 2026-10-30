@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.0.31
+
+- Kept the train icon for journey transactions and use the Bengali Taka icon only for recharge transactions.
+- Improved alignment of the low-balance warning beside the card balance.
+- Use orange for low balances and red for critical balances, including a zero balance.
+- Added scalable finance icons and themed scan warning/error animations.
+
+### Download
+
+The production release workflow publishes a release-signed APK and Android App Bundle (AAB).
+
 ## v0.0.30
 
 - Removed the success check icon from the current balance display while keeping the amount centered.
@@ -26,3 +37,4 @@ The GitHub release workflow publishes a directly installable debug APK for testi
 ### Download
 
 The GitHub release includes an installable debug APK. It is suitable for direct testing and sharing; it is not signed with a production release key.
+

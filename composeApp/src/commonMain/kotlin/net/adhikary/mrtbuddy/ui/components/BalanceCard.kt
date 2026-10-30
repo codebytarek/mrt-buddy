@@ -29,9 +29,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -62,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +79,7 @@ import mrtbuddy.composeapp.generated.resources.scanningProgress
 import mrtbuddy.composeapp.generated.resources.nfcAnimationDescription
 import mrtbuddy.composeapp.generated.resources.nfcIconDescription
 import mrtbuddy.composeapp.generated.resources.nfc_static
+import mrtbuddy.composeapp.generated.resources.taka_wallet
 import mrtbuddy.composeapp.generated.resources.errorDescription
 import mrtbuddy.composeapp.generated.resources.noNfcDescription
 import mrtbuddy.composeapp.generated.resources.nfcDisabledDescription
@@ -91,6 +91,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import mrtbuddy.composeapp.generated.resources.latestBalance
 import mrtbuddy.composeapp.generated.resources.lowBalance
+import mrtbuddy.composeapp.generated.resources.lowBalanceWarning
 import mrtbuddy.composeapp.generated.resources.nfcDisabledText
 import mrtbuddy.composeapp.generated.resources.nfcEnableText
 import mrtbuddy.composeapp.generated.resources.noNfcSupport
@@ -111,12 +112,11 @@ import net.adhikary.mrtbuddy.getPlatform
 import net.adhikary.mrtbuddy.managers.RescanManager
 import net.adhikary.mrtbuddy.model.CardState
 import net.adhikary.mrtbuddy.translateNumber
-import net.adhikary.mrtbuddy.ui.theme.Alert_yellow_D
-import net.adhikary.mrtbuddy.ui.theme.Alert_yellow_L
 import net.adhikary.mrtbuddy.ui.theme.DarkMRTPass
 import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
+import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
@@ -197,7 +197,7 @@ fun BalanceCard(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.AccountBalanceWallet,
+                                    painter = painterResource(Res.drawable.taka_wallet),
                                     contentDescription = null,
                                     tint = Color.White,
                                     modifier = Modifier.size(28.dp)
@@ -309,6 +309,50 @@ fun BalanceCard(
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+private fun StatusAnimation(
+    resourcePath: String,
+    size: Dp,
+    description: String,
+    accent: Color,
+    fallback: ImageVector
+) {
+    var json by remember(resourcePath, accent) { mutableStateOf<String?>(null) }
+    LaunchedEffect(resourcePath, accent) {
+        fun rgba(color: Color) = "[${color.red},${color.green},${color.blue},1]"
+        json = runCatching {
+            Res.readBytes(resourcePath)
+                .decodeToString()
+                .replace(
+                    "\"k\":[1,0.780392216701,0.121568634931,1]",
+                    "\"k\":${rgba(accent)}"
+                )
+        }.getOrNull()
+    }
+
+    Box(
+        modifier = Modifier.size(size).semantics { contentDescription = description },
+        contentAlignment = Alignment.Center
+    ) {
+        val animationJson = json
+        if (animationJson == null) {
+            Icon(fallback, contentDescription = null, tint = accent, modifier = Modifier.size(size))
+        } else {
+            val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(animationJson))
+            if (composition == null) {
+                Icon(fallback, contentDescription = null, tint = accent, modifier = Modifier.size(size))
+            } else {
+                LottieAnimation(
+                    composition = composition!!,
+                    iterations = LottieConstants.IterateForever,
+                    modifier = Modifier.size(size)
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun ModernBalanceContent(
     amount: Int,
@@ -329,16 +373,8 @@ private fun ModernBalanceContent(
         }
 
         // Keep warning indicators for low balances; a sufficient balance needs no check icon.
-        val balanceColor = when {
-            amount <= 20 -> MaterialTheme.colorScheme.error
-            amount <= 70 -> if (isSystemInDarkTheme()) Alert_yellow_D else Alert_yellow_L
-            else -> MaterialTheme.colorScheme.primary
-        }
-        val balanceIcon = when {
-            amount <= 20 -> Icons.Default.Warning
-            amount <= 70 -> Icons.Default.Info
-            else -> null
-        }
+        val isLowBalance = amount <= 70
+        val balanceColor = if (isLowBalance) lowBalanceOrange else MaterialTheme.colorScheme.primary
 
         Box(
             modifier = Modifier
@@ -350,12 +386,13 @@ private fun ModernBalanceContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                balanceIcon?.let { icon ->
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = balanceColor,
-                        modifier = Modifier.size(32.dp)
+                if (isLowBalance) {
+                    StatusAnimation(
+                        resourcePath = "files/attention.json",
+                        size = 36.dp,
+                        description = stringResource(Res.string.lowBalanceWarning),
+                        accent = lowBalanceOrange,
+                        fallback = Icons.Default.Warning
                     )
                 }
 
@@ -386,11 +423,12 @@ private fun ModernBalanceContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
+                        StatusAnimation(
+                            resourcePath = "files/attention.json",
+                            size = 20.dp,
+                            description = stringResource(Res.string.lowBalanceWarning),
+                            accent = lowBalanceOrange,
+                            fallback = Icons.Default.Warning
                         )
                         Text(
                             text = stringResource(Res.string.lowBalance),
@@ -656,11 +694,12 @@ private fun ModernErrorContent(message: String) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Error,
-                contentDescription = stringResource(Res.string.errorDescription),
-                modifier = Modifier.size(50.dp),
-                tint = MaterialTheme.colorScheme.error
+            StatusAnimation(
+                resourcePath = "files/connection-error.json",
+                size = 64.dp,
+                description = stringResource(Res.string.errorDescription),
+                accent = MaterialTheme.colorScheme.error,
+                fallback = Icons.Default.Error
             )
         }
 
@@ -953,3 +992,4 @@ private fun ModernNfcDisabledContent() {
         }
     }
 }
+

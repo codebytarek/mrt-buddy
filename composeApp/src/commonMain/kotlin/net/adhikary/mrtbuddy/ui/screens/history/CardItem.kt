@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +37,6 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -93,6 +93,7 @@ import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.Transparent
+import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.utils.TimeUtils
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
@@ -306,7 +307,7 @@ fun CardItem(
                                 Surface(
                                     modifier = Modifier.background(Color.Transparent),
                                     shape = RoundedCornerShape(3.dp),
-                                    color = Color.Red
+                                    color = MaterialTheme.colorScheme.error
                                 ) {
                                     Text(
                                         text = stringResource(Res.string.critical),
@@ -379,27 +380,34 @@ fun CardItem(
                                         fontFamily = FontFamily.Monospace
                                     ),
                                     color = when {
-                                        isVeryLowBalance -> Color.Red
-                                        isLowBalance -> Color.Yellow
+                                        isVeryLowBalance -> MaterialTheme.colorScheme.error
+                                        isLowBalance -> lowBalanceOrange
                                         else -> Color.White
                                     }
                                 )
                                 if (isLowBalance) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Surface(
-                                        modifier = Modifier.background(Color.Transparent),
+                                            modifier = Modifier
+                                                .offset(y = (-2).dp)
+                                                .background(Color.Transparent),
                                         shape = RoundedCornerShape(4.dp),
-                                        color = if (isVeryLowBalance) Color.Red else Color.Yellow
+                                        color = if (isVeryLowBalance) {
+                                            MaterialTheme.colorScheme.error
+                                        } else {
+                                            lowBalanceOrange
+                                        }
                                     ) {
                                         Text(
                                             text = stringResource(if (isVeryLowBalance) Res.string.critical else Res.string.low),
-                                            style = MaterialTheme.typography.labelSmall.copy(
+                                            style = MaterialTheme.typography.labelMedium.copy(
                                                 fontWeight = FontWeight.Bold,
-                                                letterSpacing = 0.5.sp
+                                                fontSize = 13.sp,
+                                                letterSpacing = 0.4.sp
                                             ),
-                                            color = if (isVeryLowBalance) Color.White else Color.Black,
+                                            color = Color.White,
                                             modifier = Modifier.background(Color.Transparent)
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                .padding(horizontal = 7.dp, vertical = 3.dp)
                                         )
                                     }
                                 }
@@ -582,3 +590,4 @@ fun CardItem(
         }
     }
 }
+
