@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  publish_debug:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,65 +43,4 @@ jobs:
           name: mrt-buddy-debug-apk
           path: composeApp/build/outputs/apk/debug/composeApp-debug.apk
           if-no-files-found: error
-
-  production_release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Install Android SDK 37
-        run: |
-          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$sdkmanager" --licenses || true
-          "$sdkmanager" "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
-
-      - uses: gradle/actions/setup-gradle@v4
-
-      - name: Grant wrapper permission
-        run: chmod +x gradlew
-
-      - name: Decode release keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "Missing GitHub Actions secret: KEYSTORE_BASE64" >&2
-            exit 1
-          fi
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > composeApp/keystore.jks
-
-      - name: Build signed release APK and bundle
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease --no-daemon
-
-      - name: Verify APK signature
-        run: "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose composeApp/build/outputs/apk/release/composeApp-release.apk
-
-      - name: Publish production release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          version=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' composeApp/build.gradle.kts | head -n 1)
-          tag="v$version"
-          apk="composeApp/build/outputs/apk/release/composeApp-release.apk"
-          bundle="composeApp/build/outputs/bundle/release/composeApp-release.aab"
-          title="MRT Buddy $tag"
-
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" --title "$title" --notes-file CHANGELOG.md
-          else
-            gh release create "$tag" --target "$GITHUB_SHA" --title "$title" --notes-file CHANGELOG.md
-          fi
-
-          gh release upload "$tag" "$apk#MRT-Buddy-${tag}-production.apk" "$bundle#MRT-Buddy-${tag}.aab" --clobber
 
