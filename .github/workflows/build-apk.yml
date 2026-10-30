@@ -51,7 +51,8 @@ jobs:
         run: './gradlew :composeApp:assembleRelease :composeApp:bundleRelease --no-daemon'
 
       - name: Verify APK signature
-        run: "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose composeApp/build/outputs/apk/release/composeApp-release.apk
+        run: |
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose composeApp/build/outputs/apk/release/composeApp-release.apk
 
       - name: Publish production release
         env:
