@@ -19,7 +19,7 @@
     <string name="quickSetupGuideText3">৩. এই অ্যাপে ফিরে এসে আবার চেষ্টা করুন</string>
     <string name="readingCard">কার্ড পড়া হচ্ছে...</string>
     <string name="keepCardSteady">পড়া সম্পন্ন না হওয়া পর্যন্ত কার্ডটি স্থির রাখুন।</string>
-    <string name="hold">কার্ডটি আপনার ফোনের পেছনের দিকে লাগিয়ে রাখুন</string>
+    <string name="hold">ব্যালেন্স দেখতে কার্ডটি ফোনের পেছনে ধরুন</string>
     <string name="noNfcSupport">এই ডিভাইসে NFC সুবিধা নেই</string>
     <string name="requiredNfc">এমআরটি পাস পড়তে NFC প্রয়োজন, কিন্তু আপনার ডিভাইসে NFC সুবিধা নেই।</string>
     <string name="nfcDisabled">NFC বন্ধ আছে</string>

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.34
+
+- Updated the English card placement instruction and restored the previous Bengali wording.
+
 ## v0.0.33
 
 - Removed the recharge plus sign, transaction timestamp icons, and minus sign from the spent summary total.
