@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.32
+
+- Evenly spaced Card Summary metrics and improved the transaction summary header on narrow screens.
+
 ## v0.0.31
 
 - Kept the train icon for journey transactions and use the Bengali Taka icon only for recharge transactions.

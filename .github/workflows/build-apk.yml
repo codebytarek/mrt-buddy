@@ -2,6 +2,11 @@ name: Production Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'composeApp/build.gradle.kts'
 
 permissions:
   contents: write

@@ -464,44 +464,53 @@ fun TransactionSummaryCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(Res.string.transactionSummary),
+                    modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = stringResource(Res.string.transactionsCount, translateNumber(transactions.size)),
+                    modifier = Modifier.padding(start = 12.dp),
                     style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.Top
             ) {
                 SummaryItem(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Default.DirectionsTransit,
                     label = stringResource(Res.string.journeys),
                     value = translateNumber(commuteTransactions.size),
                     color = MaterialTheme.colorScheme.primary
                 )
                 SummaryItem(
+                    modifier = Modifier.weight(1f),
                     iconPainter = painterResource(Res.drawable.bengali_taka),
                     label = stringResource(Res.string.recharges),
                     value = translateNumber(rechargeTransactions.size),
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
+                    modifier = Modifier.weight(1f),
                     iconPainter = painterResource(Res.drawable.calculator_vector),
                     label = stringResource(Res.string.amount),
                     value = "৳${translateNumber(totalAdded)}",
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
+                    modifier = Modifier.weight(1f),
                     iconPainter = painterResource(Res.drawable.spending_vector),
                     label = stringResource(Res.string.spent),
                     value = "৳${translateNumber(totalSpent)}",
@@ -509,6 +518,7 @@ fun TransactionSummaryCard(
                 )
                 if (currentBalance != null) {
                     SummaryItem(
+                        modifier = Modifier.weight(1f),
                         iconPainter = painterResource(Res.drawable.taka_wallet),
                         label = stringResource(Res.string.balance),
                         value = "৳${translateNumber(currentBalance)}",
@@ -522,6 +532,7 @@ fun TransactionSummaryCard(
 
 @Composable
 fun SummaryItem(
+    modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     iconPainter: Painter? = null,
     label: String,
@@ -529,6 +540,7 @@ fun SummaryItem(
     color: Color
 ) {
     Column(
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -558,12 +570,18 @@ fun SummaryItem(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = value,
+                maxLines = 1,
+                softWrap = false,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = color
             )
             Text(
                 text = label,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
