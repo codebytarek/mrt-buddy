@@ -92,6 +92,7 @@ import org.jetbrains.compose.resources.painterResource
 import mrtbuddy.composeapp.generated.resources.latestBalance
 import mrtbuddy.composeapp.generated.resources.lowBalance
 import mrtbuddy.composeapp.generated.resources.lowBalanceWarning
+import mrtbuddy.composeapp.generated.resources.emptyBalance
 import mrtbuddy.composeapp.generated.resources.nfcDisabledText
 import mrtbuddy.composeapp.generated.resources.nfcEnableText
 import mrtbuddy.composeapp.generated.resources.noNfcSupport
@@ -372,9 +373,16 @@ private fun ModernBalanceContent(
             )
         }
 
-        // Keep warning indicators for low balances; a sufficient balance needs no check icon.
-        val isLowBalance = amount <= 70
-        val balanceColor = if (isLowBalance) lowBalanceOrange else MaterialTheme.colorScheme.primary
+        val isLowBalance = amount in 18..35
+        val isCriticalBalance = amount in 1..17
+        val isEmptyBalance = amount <= 0
+        val showBalanceWarning = isLowBalance || isCriticalBalance || isEmptyBalance
+        val warningColor = if (isLowBalance) lowBalanceOrange else MaterialTheme.colorScheme.error
+        val balanceColor = when {
+            isLowBalance -> lowBalanceOrange
+            isCriticalBalance || isEmptyBalance -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.primary
+        }
 
         Box(
             modifier = Modifier
@@ -386,12 +394,16 @@ private fun ModernBalanceContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                if (isLowBalance) {
+                if (showBalanceWarning) {
                     StatusAnimation(
-                        resourcePath = "files/attention.json",
+                        resourcePath = if (isCriticalBalance || isEmptyBalance) {
+                            "files/connection-error.json"
+                        } else {
+                            "files/attention.json"
+                        },
                         size = 44.dp,
                         description = stringResource(Res.string.lowBalanceWarning),
-                        accent = lowBalanceOrange,
+                        accent = warningColor,
                         fallback = Icons.Default.Warning
                     )
                 }
@@ -407,40 +419,19 @@ private fun ModernBalanceContent(
             }
         }
 
-        // Enhanced status message with modern styling
         when {
-            amount <= 20 -> {
-                Card(
-                    modifier = Modifier.glassSurface(RoundedCornerShape(16.dp)),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.34f)
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        StatusAnimation(
-                            resourcePath = "files/attention.json",
-                            size = 20.dp,
-                            description = stringResource(Res.string.lowBalanceWarning),
-                            accent = lowBalanceOrange,
-                            fallback = Icons.Default.Warning
-                        )
-                        Text(
-                            text = stringResource(Res.string.lowBalance),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-
+            isEmptyBalance -> Text(
+                text = stringResource(Res.string.emptyBalance),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
+            )
+            isCriticalBalance || isLowBalance -> Text(
+                text = stringResource(Res.string.lowBalance),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = warningColor,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

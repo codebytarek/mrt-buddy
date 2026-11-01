@@ -102,7 +102,11 @@ class HistoryScreenViewModel(
                             isLoading = false,
                             isRefreshing = false,
                             cards = records.map { record ->
-                                CardWithBalance(record.card, record.balance)
+                                CardWithBalance(
+                                    card = record.card,
+                                    balance = record.balance,
+                                    isLowBalance = record.balance != null && record.balance in 0..35
+                                )
                             },
                             error = null,
                             lastUpdated = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.35
+
+- Added low, critical, and empty balance states with orange and red warning animations.
+- Refined balance warnings and localized their messages in English and Bengali.
+- Updated saved-card summaries and recharge/journey icons, and standardized signed amount formatting.
+
 ## v0.0.34
 
 - Updated the English card placement instruction and restored the previous Bengali wording.

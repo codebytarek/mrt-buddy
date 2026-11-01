@@ -7,7 +7,7 @@
     <string name="language">Language</string>
     <string name="rescan">Rescan</string>
     <string name="latestBalance">Current Balance</string>
-    <string name="lowBalance">Your balance is low. Top up before your next journey.</string>
+    <string name="lowBalance">Your balance is low. Consider topping up soon.</string>
     <string name="tap">Tap Your Card</string>
     <string name="tips">Tips</string>
     <string name="tipsText">Hold your card near the NFC area and keep it steady while scanning.</string>
@@ -131,6 +131,7 @@
     <string name="deleteCardHistoryWarning">This action cannot be undone. All transaction history for this card will be permanently deleted.</string>
     <string name="yourCards">Your Cards</string>
     <string name="lowBalanceWarning">Low Balance Warning</string>
+    <string name="emptyBalance">Your card balance is empty. Please recharge to travel.</string>
     <string name="renameCardDescription">Give your card a name to easily identify it.</string>
     <string name="cardNamePlaceholder">e.g. Home, Office, Personal</string>
     <string name="cardNameEmptyError">Card name cannot be empty</string>
@@ -139,6 +140,7 @@
     <string name="moreOptions">More options</string>
     <string name="critical">CRITICAL</string>
     <string name="low">LOW</string>
+    <string name="empty">EMPTY</string>
     <string name="contactless">Contactless</string>
     <string name="hideCardId">Hide ID</string>
     <string name="showCardId">Show ID</string>

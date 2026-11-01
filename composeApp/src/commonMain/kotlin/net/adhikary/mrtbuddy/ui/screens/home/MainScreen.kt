@@ -96,6 +96,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import mrtbuddy.composeapp.generated.resources.recentActivity
 import mrtbuddy.composeapp.generated.resources.recharge
 import mrtbuddy.composeapp.generated.resources.noTransactionsInCard
+import mrtbuddy.composeapp.generated.resources.notAvailable
 import net.adhikary.mrtbuddy.nfc.service.StationService
 import net.adhikary.mrtbuddy.translateNumber
 import net.adhikary.mrtbuddy.model.TransactionType
@@ -598,16 +599,17 @@ private fun ModernTransactionItem(
                     transaction.transaction.toStation
                 )
                 Text(
-                    text = amount?.let { "৳ ${translateNumber(it)}" } ?: "N/A",
+                    text = amount?.let {
+                        val sign = if (recharge) "+" else "-"
+                        "$sign৳${translateNumber(kotlin.math.abs(it))}"
+                    } ?: stringResource(Res.string.notAvailable),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
                     color = when {
                         recharge -> if (dark) DarkPositiveGreen else LightPositiveGreen
                         amount == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                        amount > 0 -> if (dark) DarkPositiveGreen else LightPositiveGreen
-                        amount < 0 -> if (dark) DarkNegativeRed else LightNegativeRed
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> if (dark) DarkNegativeRed else LightNegativeRed
                     }
                 )
             }

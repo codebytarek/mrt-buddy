@@ -7,7 +7,7 @@
     <string name="language">ভাষা</string>
     <string name="rescan">পুনরায় স্ক্যান</string>
     <string name="latestBalance">সর্বশেষ ব্যালেন্স</string>
-    <string name="lowBalance">পরবর্তী যাত্রার জন্য আপনার ব্যালেন্স পর্যাপ্ত নয়। রিচার্জ করুন।</string>
+    <string name="lowBalance">আপনার ব্যালেন্স কম। শিগগিরই রিচার্জ করার কথা বিবেচনা করুন।</string>
     <string name="tap">কার্ডটি ট্যাপ করুন</string>
     <string name="tips">টিপস</string>
     <string name="tipsText">স্ক্যান সম্পন্ন না হওয়া পর্যন্ত কার্ডটি ফোনের NFC অংশে ধরে রাখুন।</string>
@@ -106,7 +106,7 @@
     <string name="balanceAmount">ব্যালেন্স</string>
     <string name="need_more_amount">আরও ৳ %s প্রয়োজন</string>
     <string name="amount">পরিমাণ</string>
-    <string name="recharges">রিচার্জের সংখ্যা</string>
+    <string name="recharges">রিচার্জ</string>
     <string name="welcomeBack">আবার স্বাগতম</string>
     <string name="transactionsCount">%1$sটি লেনদেন</string>
     <string name="notAvailable">উপলভ্য নয়</string>
@@ -131,6 +131,7 @@
     <string name="deleteCardHistoryWarning">এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। এই কার্ডের সব লেনদেনের ইতিহাস স্থায়ীভাবে মুছে যাবে।</string>
     <string name="yourCards">আপনার কার্ড</string>
     <string name="lowBalanceWarning">কম ব্যালেন্সের সতর্কতা</string>
+    <string name="emptyBalance">আপনার কার্ডে কোনো ব্যালেন্স নেই। যাত্রার জন্য রিচার্জ করুন।</string>
     <string name="renameCardDescription">সহজে চেনার জন্য আপনার কার্ডের একটি নাম দিন।</string>
     <string name="cardNamePlaceholder">যেমন: বাসার কার্ড, অফিসের কার্ড, ব্যক্তিগত কার্ড</string>
     <string name="cardNameEmptyError">কার্ডের নাম খালি রাখা যাবে না</string>
@@ -139,6 +140,7 @@
     <string name="moreOptions">আরও বিকল্প</string>
     <string name="critical">অত্যন্ত কম</string>
     <string name="low">কম</string>
+    <string name="empty">খালি</string>
     <string name="contactless">কন্ট্যাক্টলেস</string>
     <string name="hideCardId">কার্ড আইডি লুকান</string>
     <string name="showCardId">কার্ড আইডি দেখান</string>

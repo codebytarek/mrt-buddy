@@ -29,11 +29,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -72,8 +69,6 @@ import mrtbuddy.composeapp.generated.resources.amount
 import mrtbuddy.composeapp.generated.resources.balance
 import mrtbuddy.composeapp.generated.resources.back
 import mrtbuddy.composeapp.generated.resources.balanceWithAmount
-import mrtbuddy.composeapp.generated.resources.addedAccessibility
-import mrtbuddy.composeapp.generated.resources.spentAccessibility
 import mrtbuddy.composeapp.generated.resources.journeys
 import mrtbuddy.composeapp.generated.resources.loadingTransactions
 import mrtbuddy.composeapp.generated.resources.loadingTransactionsDescription
@@ -91,10 +86,11 @@ import mrtbuddy.composeapp.generated.resources.transactionsAppearPrompt
 import mrtbuddy.composeapp.generated.resources.transactionsEmptyTip
 import mrtbuddy.composeapp.generated.resources.tryAgain
 import mrtbuddy.composeapp.generated.resources.unnamedCard
-import mrtbuddy.composeapp.generated.resources.bengali_taka
-import mrtbuddy.composeapp.generated.resources.calculator_vector
+import mrtbuddy.composeapp.generated.resources.card_summary
 import mrtbuddy.composeapp.generated.resources.spending_vector
 import mrtbuddy.composeapp.generated.resources.taka_wallet
+import mrtbuddy.composeapp.generated.resources.train
+import mrtbuddy.composeapp.generated.resources.wallet
 import net.adhikary.mrtbuddy.data.TransactionEntityWithAmount
 import net.adhikary.mrtbuddy.model.TransactionType
 import net.adhikary.mrtbuddy.nfc.service.StationService
@@ -489,21 +485,21 @@ fun TransactionSummaryCard(
             ) {
                 SummaryItem(
                     modifier = Modifier.weight(1f),
-                    icon = Icons.Default.DirectionsTransit,
+                    iconPainter = painterResource(Res.drawable.train),
                     label = stringResource(Res.string.journeys),
                     value = translateNumber(commuteTransactions.size),
                     color = MaterialTheme.colorScheme.primary
                 )
                 SummaryItem(
                     modifier = Modifier.weight(1f),
-                    iconPainter = painterResource(Res.drawable.bengali_taka),
+                    iconPainter = painterResource(Res.drawable.wallet),
                     label = stringResource(Res.string.recharges),
                     value = translateNumber(rechargeTransactions.size),
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
                 )
                 SummaryItem(
                     modifier = Modifier.weight(1f),
-                    iconPainter = painterResource(Res.drawable.calculator_vector),
+                    iconPainter = painterResource(Res.drawable.card_summary),
                     label = stringResource(Res.string.amount),
                     value = "৳${translateNumber(totalAdded)}",
                     color = if (darkTheme) DarkPositiveGreen else LightPositiveGreen
@@ -598,12 +594,6 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
         label = "transaction_scale"
     )
 
-    val amountText = if (trxEntity.amount != null) {
-        "৳ ${translateNumber(trxEntity.amount)}"
-    } else {
-        stringResource(Res.string.notAvailable)
-    }
-
     val tz = TimestampService.getDefaultTimezone()
     val dateTimeFormatted = TimestampService.formatDateTime(
         Instant.fromEpochMilliseconds(transaction.dateTime).toLocalDateTime(tz)
@@ -614,13 +604,14 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
         transaction.fromStation,
         transaction.toStation
     )
-    val isPositive = trxEntity.amount != null && (trxEntity.amount > 0 || isRecharge)
+    val amountText = trxEntity.amount?.let { amount ->
+        val sign = if (isRecharge) "+" else "-"
+        "$sign৳${translateNumber(kotlin.math.abs(amount))}"
+    } ?: stringResource(Res.string.notAvailable)
     val amountColor = when {
         isRecharge -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
         trxEntity.amount == null -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        trxEntity.amount < 0 -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
-        trxEntity.amount > 0 -> if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> if (isDarkTheme) DarkNegativeRed else LightNegativeRed
     }
 
     Card(
@@ -661,14 +652,14 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                 ) {
                     if (isRecharge) {
                         Icon(
-                            painter = painterResource(Res.drawable.bengali_taka),
+                            painter = painterResource(Res.drawable.wallet),
                             contentDescription = null,
                             tint = if (isDarkTheme) DarkPositiveGreen else LightPositiveGreen,
                             modifier = Modifier.size(24.dp)
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Default.DirectionsTransit,
+                            painter = painterResource(Res.drawable.train),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(24.dp)
@@ -712,44 +703,16 @@ fun EnhancedTransactionItem(trxEntity: TransactionEntityWithAmount) {
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (isPositive) {
-                        Icon(
-                            imageVector = Icons.Default.TrendingUp,
-                            contentDescription = stringResource(Res.string.addedAccessibility),
-                            modifier = Modifier.size(16.dp),
-                            tint = amountColor
-                        )
-                        Text(
-                            text = if (isRecharge) amountText else "+$amountText",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = amountColor
-                        )
-                    } else if (trxEntity.amount != null) {
-                        Icon(
-                            imageVector = Icons.Default.TrendingDown,
-                            contentDescription = stringResource(Res.string.spentAccessibility),
-                            modifier = Modifier.size(16.dp),
-                            tint = amountColor
-                        )
-                        Text(
-                            text = amountText,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = amountColor
-                        )
+                Text(
+                    text = amountText,
+                    style = if (trxEntity.amount != null) {
+                        MaterialTheme.typography.titleMedium
                     } else {
-                        Text(
-                            text = amountText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = amountColor
-                        )
-                    }
-                }
+                        MaterialTheme.typography.bodyMedium
+                    },
+                    fontWeight = if (trxEntity.amount != null) FontWeight.Bold else FontWeight.Normal,
+                    color = amountColor
+                )
 
                 if (!isRecharge) {
                     Text(

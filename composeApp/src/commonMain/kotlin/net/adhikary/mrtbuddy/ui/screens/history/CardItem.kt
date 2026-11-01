@@ -77,6 +77,7 @@ import mrtbuddy.composeapp.generated.resources.cardId
 import mrtbuddy.composeapp.generated.resources.cardIdLabel
 import mrtbuddy.composeapp.generated.resources.contactless
 import mrtbuddy.composeapp.generated.resources.critical
+import mrtbuddy.composeapp.generated.resources.empty
 import mrtbuddy.composeapp.generated.resources.deleteCard
 import mrtbuddy.composeapp.generated.resources.hideCardId
 import mrtbuddy.composeapp.generated.resources.lastScanLabel
@@ -112,10 +113,9 @@ fun CardItem(
     var isIdVisible by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
 
-    // Enhanced status logic for MRT Buddy context
-    val isLowBalance = balance != null && balance < 50
-    val isCriticalBalance = balance != null && balance < 20
-    val isVeryLowBalance = balance != null && balance < 10
+    val isLowBalance = balance != null && balance in 18..35
+    val isCriticalBalance = balance != null && balance in 1..17
+    val isEmptyBalance = balance != null && balance <= 0
     val isInactive = card.lastScanTime?.let { lastScan ->
         val currentTime = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
         val daysDifference = (currentTime - lastScan) / (1000 * 60 * 60 * 24)
@@ -301,29 +301,6 @@ fun CardItem(
                             color = Color.White.copy(alpha = 0.9f)
                         )
 
-                        // Status indicators
-                        when {
-                            isVeryLowBalance -> {
-                                Surface(
-                                    modifier = Modifier.background(Color.Transparent),
-                                    shape = RoundedCornerShape(3.dp),
-                                    color = MaterialTheme.colorScheme.error
-                                ) {
-                                    Text(
-                                        text = stringResource(Res.string.critical),
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            letterSpacing = 0.5.sp
-                                        ),
-                                        color = Color.White,
-                                        modifier = Modifier
-                                            .background(Color.Transparent)
-                                            .padding(horizontal = 4.dp, vertical = 1.dp)
-                                    )
-                                }
-                            }
-                        }
-
                         if (isInactive) {
                             Surface(
                                 shape = CircleShape,
@@ -380,26 +357,32 @@ fun CardItem(
                                         fontFamily = FontFamily.Monospace
                                     ),
                                     color = when {
-                                        isVeryLowBalance -> MaterialTheme.colorScheme.error
+                                        isCriticalBalance || isEmptyBalance -> MaterialTheme.colorScheme.error
                                         isLowBalance -> lowBalanceOrange
                                         else -> Color.White
                                     }
                                 )
-                                if (isLowBalance) {
+                                if (isLowBalance || isCriticalBalance || isEmptyBalance) {
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Surface(
-                                            modifier = Modifier
-                                                .offset(y = (-2).dp)
-                                                .background(Color.Transparent),
+                                        modifier = Modifier
+                                            .offset(y = (-2).dp)
+                                            .background(Color.Transparent),
                                         shape = RoundedCornerShape(4.dp),
-                                        color = if (isVeryLowBalance) {
+                                        color = if (isCriticalBalance || isEmptyBalance) {
                                             MaterialTheme.colorScheme.error
                                         } else {
                                             lowBalanceOrange
                                         }
                                     ) {
                                         Text(
-                                            text = stringResource(if (isVeryLowBalance) Res.string.critical else Res.string.low),
+                                            text = stringResource(
+                                                when {
+                                                    isEmptyBalance -> Res.string.empty
+                                                    isCriticalBalance -> Res.string.critical
+                                                    else -> Res.string.low
+                                                }
+                                            ),
                                             style = MaterialTheme.typography.labelMedium.copy(
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 13.sp,
