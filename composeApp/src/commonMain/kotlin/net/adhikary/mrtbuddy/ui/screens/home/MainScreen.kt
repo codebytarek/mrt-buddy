@@ -422,7 +422,7 @@ private fun ModernHomeScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "${uiState.transaction.size}",
+                        text = translateNumber(uiState.transaction.size),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary

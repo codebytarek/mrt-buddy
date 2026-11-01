@@ -401,7 +401,7 @@ private fun ModernBalanceContent(
                         } else {
                             "files/attention.json"
                         },
-                        size = 44.dp,
+                        size = 52.dp,
                         description = stringResource(Res.string.lowBalanceWarning),
                         accent = warningColor,
                         fallback = Icons.Default.Warning

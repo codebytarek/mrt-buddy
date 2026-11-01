@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.36
+
+- Enlarged the low-balance warning animation for better visibility.
+- Localized the Balance screen transaction count digits for Bengali.
+
 ## v0.0.35
 
 - Added low, critical, and empty balance states with orange and red warning animations.
