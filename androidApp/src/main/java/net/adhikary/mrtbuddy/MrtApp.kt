@@ -11,7 +11,7 @@ import org.koin.core.context.startKoin
 class MRTApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        if (isDebug) {
+        if (BuildConfig.DEBUG) {
             Napier.base(DebugAntilog())
         }
 

@@ -5,11 +5,14 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 
@@ -58,6 +61,40 @@ fun Modifier.navigationGlassSurface(shape: Shape): Modifier = composed {
         )
 }
 
+/** Shared soft reflections used by the floating navigation and balance card. */
+fun Modifier.navigationGlassHighlight(shape: Shape): Modifier = composed {
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    this
+        .clip(shape)
+        .drawBehind {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to Color.White.copy(alpha = if (dark) 0.30f else 0.44f),
+                        0.12f to Color.White.copy(alpha = if (dark) 0.12f else 0.20f),
+                        0.42f to Color.Transparent,
+                        0.78f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = if (dark) 0.15f else 0.035f)
+                    )
+                ),
+                topLeft = Offset.Zero,
+                size = Size(size.width, size.height)
+            )
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        Color.White.copy(alpha = if (dark) 0.10f else 0.22f),
+                        Color.Transparent,
+                        Color.Transparent,
+                        Color.White.copy(alpha = if (dark) 0.07f else 0.16f)
+                    )
+                ),
+                topLeft = Offset.Zero,
+                size = Size(size.width, size.height)
+            )
+        }
+}
+
 /** Shared translucent glass styling for information surfaces and floating controls. */
 fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
@@ -86,6 +123,64 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
                     0f to edge,
                     0.72f to Color.White.copy(alpha = if (dark) 0.20f else 0.28f),
                     1f to edgeBottom
+                )
+            ),
+            shape = shape
+        )
+}
+
+/** Opaque frosted-glass treatment for controls and dialogs whose contents must stay easy to read. */
+fun Modifier.frostedGlassSurface(shape: Shape): Modifier = composed {
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val surface = MaterialTheme.colorScheme.surface
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val fill = Brush.verticalGradient(
+        colorStops = if (dark) {
+            arrayOf(
+                0f to surfaceVariant.copy(alpha = 0.98f),
+                0.12f to surface.copy(alpha = 0.98f),
+                0.72f to surface.copy(alpha = 0.97f),
+                1f to surfaceVariant.copy(alpha = 0.98f)
+            )
+        } else {
+            arrayOf(
+                0f to Color.White.copy(alpha = 0.99f),
+                0.12f to surface.copy(alpha = 0.98f),
+                0.72f to surface.copy(alpha = 0.97f),
+                1f to surfaceVariant.copy(alpha = 0.98f)
+            )
+        }
+    )
+
+    this
+        .shadow(
+            elevation = 10.dp,
+            shape = shape,
+            ambientColor = Color.Black.copy(alpha = if (dark) 0.22f else 0.08f),
+            spotColor = Color.Black.copy(alpha = if (dark) 0.24f else 0.10f)
+        )
+        .clip(shape)
+        .background(fill, shape)
+        .drawBehind {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to Color.White.copy(alpha = if (dark) 0.14f else 0.48f),
+                        0.16f to Color.White.copy(alpha = if (dark) 0.045f else 0.13f),
+                        0.44f to Color.Transparent,
+                        1f to Color.Transparent
+                    )
+                ),
+                size = Size(size.width, size.height)
+            )
+        }
+        .border(
+            width = 1.dp,
+            brush = Brush.verticalGradient(
+                listOf(
+                    Color.White.copy(alpha = if (dark) 0.54f else 0.90f),
+                    Color.White.copy(alpha = if (dark) 0.20f else 0.48f),
+                    surfaceVariant.copy(alpha = if (dark) 0.52f else 0.54f)
                 )
             ),
             shape = shape

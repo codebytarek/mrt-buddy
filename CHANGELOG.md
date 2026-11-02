@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.37
+
+- Upgraded Android Gradle Plugin and Gradle to supported releases for Android API 37.
+- Migrated the Android application entry point into a dedicated app module, keeping shared Kotlin Multiplatform code and platform behavior intact.
+- Updated Kotlin, Compose Multiplatform, and KSP to compatible current releases.
+- Refined balance warning presentation, fare selector surfaces, and card history visuals.
+
 ## v0.0.36
 
 - Enlarged the low-balance warning animation for better visibility.

@@ -77,10 +77,10 @@ import mrtbuddy.composeapp.generated.resources.lowBalanceWarning
 import mrtbuddy.composeapp.generated.resources.historyLoadError
 import mrtbuddy.composeapp.generated.resources.renameCardError
 import mrtbuddy.composeapp.generated.resources.deleteCardError
-import mrtbuddy.composeapp.generated.resources.cardRenamed
 import mrtbuddy.composeapp.generated.resources.cardDeleted
 import net.adhikary.mrtbuddy.translateNumber
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.frostedGlassSurface
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -101,7 +101,6 @@ fun HistoryScreen(
     val loadErrorText = stringResource(Res.string.historyLoadError)
     val renameErrorText = stringResource(Res.string.renameCardError)
     val deleteErrorText = stringResource(Res.string.deleteCardError)
-    val renameSuccessText = stringResource(Res.string.cardRenamed)
     val deleteSuccessText = stringResource(Res.string.cardDeleted)
 
     LaunchedEffect(viewModel, refreshKey) {
@@ -124,7 +123,7 @@ fun HistoryScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, renameSuccessText, deleteSuccessText) {
+    LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, deleteSuccessText) {
         viewModel.events.collect { event ->
             when (event) {
                 is HistoryScreenEvent.Error -> {
@@ -136,7 +135,7 @@ fun HistoryScreen(
                     }
                     snackbarHostState.showSnackbar(message)
                 }
-                HistoryScreenEvent.RenameSuccess -> snackbarHostState.showSnackbar(renameSuccessText)
+                HistoryScreenEvent.RenameSuccess -> Unit
                 HistoryScreenEvent.DeleteSuccess -> snackbarHostState.showSnackbar(deleteSuccessText)
                 is HistoryScreenEvent.ShowRenameDialog -> Unit
             }
@@ -171,7 +170,7 @@ fun HistoryScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            modifier = Modifier.glassSurface(RoundedCornerShape(24.dp)),
+            modifier = Modifier.frostedGlassSurface(RoundedCornerShape(24.dp)),
             shape = RoundedCornerShape(24.dp),
             containerColor = androidx.compose.ui.graphics.Color.Transparent,
             tonalElevation = 0.dp,

@@ -4,7 +4,6 @@ import MoreScreen
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -53,6 +51,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -80,6 +79,7 @@ import net.adhikary.mrtbuddy.ui.components.HistoryIcon
 import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassHighlight
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
@@ -230,47 +230,14 @@ private fun ModernNavigationBar(
     navController: NavHostController
 ) {
     val shape = RoundedCornerShape(42.dp)
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 14.dp, vertical = 8.dp)
             .navigationGlassSurface(shape)
+            .navigationGlassHighlight(shape)
     ) {
-        // Broad reflection and shaded lower edge create the frosted, rounded glass lens.
-        Box(
-            Modifier
-                .matchParentSize()
-                .clip(shape)
-                .background(
-                    Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0f to Color.White.copy(alpha = if (dark) 0.30f else 0.44f),
-                            0.12f to Color.White.copy(alpha = if (dark) 0.12f else 0.20f),
-                            0.42f to Color.Transparent,
-                            0.78f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = if (dark) 0.15f else 0.035f)
-                        )
-                    )
-                )
-        )
-        Box(
-            Modifier
-                .matchParentSize()
-                .padding(1.dp)
-                .clip(RoundedCornerShape(41.dp))
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            Color.White.copy(alpha = if (dark) 0.10f else 0.22f),
-                            Color.Transparent,
-                            Color.Transparent,
-                            Color.White.copy(alpha = if (dark) 0.07f else 0.16f)
-                        )
-                    )
-                )
-        )
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp).height(66.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -442,7 +409,7 @@ private fun ModernHomeScreen(
             cardState = uiState.cardState,
             cardName = uiState.cardName,
             cardIdm = uiState.cardIdm,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().zIndex(1f)
         )
 
         uiState.error?.let { errorMessage ->
@@ -497,6 +464,7 @@ private fun ModernHomeScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
+                        .clip(RoundedCornerShape(18.dp))
                         .padding(8.dp),
                     contentPadding = PaddingValues(bottom = bottomContentPadding),
                     verticalArrangement = Arrangement.spacedBy(12.dp)

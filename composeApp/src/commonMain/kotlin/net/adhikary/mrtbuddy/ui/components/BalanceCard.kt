@@ -55,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -119,6 +118,8 @@ import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassHighlight
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
 
@@ -140,13 +141,8 @@ fun BalanceCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .scale(animatedScale)
-            .glassSurface(RoundedCornerShape(28.dp))
-            .shadow(
-                elevation = 0.dp,
-                shape = RoundedCornerShape(28.dp),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-            ),
+            .navigationGlassSurface(RoundedCornerShape(28.dp))
+            .navigationGlassHighlight(RoundedCornerShape(28.dp)),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(28.dp), // More rounded corners
         colors = CardDefaults.cardColors(

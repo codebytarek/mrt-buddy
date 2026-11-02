@@ -18,7 +18,8 @@ class AndroidPlatform : Platform {
 
 actual fun getPlatform(): Platform = AndroidPlatform()
 
-actual val isDebug: Boolean = BuildConfig.DEBUG
+// Android debug logging is configured by the Android application module.
+actual val isDebug: Boolean = false
 
 @Composable
 actual fun ConfigureSystemBars(darkTheme: Boolean) {

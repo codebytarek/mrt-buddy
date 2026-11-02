@@ -5,7 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,32 +21,38 @@ import androidx.compose.material.icons.rounded.Percent
 import androidx.compose.material.icons.rounded.Sell
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.frostedGlassSurface
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import net.adhikary.mrtbuddy.data.model.Station
 import net.adhikary.mrtbuddy.ui.components.StaticNfcIcon
 import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import androidx.compose.ui.Alignment
@@ -213,95 +222,39 @@ fun StationSelectionSection(uiState: FareCalculatorState, viewModel: FareCalcula
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     // Left column: From and To stacked vertically
                     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box {
-                            StationChip(
-                                label = stringResource(Res.string.fromStationLabel),
-                                value = uiState.fromStation?.let { StationService.translate(it.name) } ?: stringResource(Res.string.selectOrigin),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                leading = Icons.Default.LocationOn,
-                                onClick = { combinedAnchor.value = "from" }
-                            )
-
-                            if (combinedAnchor.value == "from") {
-                                // Inline dropdown instead of Dialog
-                                Card(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 84.dp).glassSurface(RoundedCornerShape(16.dp)),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                    elevation = CardDefaults.elevatedCardElevation(0.dp)
-                                ) {
-                                    Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                                        Text(text = stringResource(Res.string.fromStationLabel), style = MaterialTheme.typography.labelLarge)
-                                        if (viewModel.stations.isEmpty()) {
-                                            Text(text = stringResource(Res.string.selectOrigin), modifier = Modifier.padding(8.dp))
-                                        } else {
-                                            Box(modifier = Modifier.heightIn(max = 320.dp)) {
-                                                LazyColumn(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                    items(viewModel.stations.drop(1)) { station ->
-                                                        Row(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .clickable { viewModel.onAction(FareCalculatorAction.UpdateFromStation(station)); combinedAnchor.value = null }
-                                                                .padding(vertical = 8.dp, horizontal = 8.dp),
-                                                            verticalAlignment = Alignment.CenterVertically
-                                                        ) {
-                                                            Text(text = StationService.translate(station.name), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                                                            val selected = uiState.fromStation?.id == station.id
-                                                            if (selected) Text(text = "✓", color = MaterialTheme.colorScheme.primary)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        val fromExpanded = combinedAnchor.value == "from"
+                        StationChip(
+                            label = stringResource(Res.string.fromStationLabel),
+                            value = uiState.fromStation?.let { StationService.translate(it.name) } ?: stringResource(Res.string.selectOrigin),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            leading = Icons.Default.LocationOn,
+                            expanded = fromExpanded,
+                            stations = viewModel.stations.drop(1),
+                            selectedStationId = uiState.fromStation?.id,
+                            onClick = { combinedAnchor.value = if (fromExpanded) null else "from" },
+                            onDismissRequest = { combinedAnchor.value = null },
+                            onStationSelected = { station ->
+                                viewModel.onAction(FareCalculatorAction.UpdateFromStation(station))
+                                combinedAnchor.value = null
                             }
-                        }
+                        )
 
-                        Box {
-                            StationChip(
-                                label = stringResource(Res.string.toStationLabel),
-                                value = uiState.toStation?.let { StationService.translate(it.name) } ?: stringResource(Res.string.selectDestination),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                leading = Icons.Default.LocationOn,
-                                onClick = { combinedAnchor.value = "to" }
-                            )
-
-                            if (combinedAnchor.value == "to") {
-                                // Inline dropdown instead of Dialog
-                                Card(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 84.dp).glassSurface(RoundedCornerShape(16.dp)),
-                                    shape = RoundedCornerShape(16.dp),
-                                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                                    elevation = CardDefaults.elevatedCardElevation(0.dp)
-                                ) {
-                                    Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                                        Text(text = stringResource(Res.string.toStationLabel), style = MaterialTheme.typography.labelLarge)
-                                        if (viewModel.stations.isEmpty()) {
-                                            Text(text = stringResource(Res.string.selectDestination), modifier = Modifier.padding(8.dp))
-                                        } else {
-                                            Box(modifier = Modifier.heightIn(max = 320.dp)) {
-                                                LazyColumn(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                    items(viewModel.stations.drop(1)) { station ->
-                                                        Row(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .clickable { viewModel.onAction(FareCalculatorAction.UpdateToStation(station)); combinedAnchor.value = null }
-                                                                .padding(vertical = 8.dp, horizontal = 8.dp),
-                                                            verticalAlignment = Alignment.CenterVertically
-                                                        ) {
-                                                            Text(text = StationService.translate(station.name), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-                                                            val selected = uiState.toStation?.id == station.id
-                                                            if (selected) Text(text = "✓", color = MaterialTheme.colorScheme.primary)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                        val toExpanded = combinedAnchor.value == "to"
+                        StationChip(
+                            label = stringResource(Res.string.toStationLabel),
+                            value = uiState.toStation?.let { StationService.translate(it.name) } ?: stringResource(Res.string.selectDestination),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            leading = Icons.Default.LocationOn,
+                            expanded = toExpanded,
+                            stations = viewModel.stations.drop(1),
+                            selectedStationId = uiState.toStation?.id,
+                            onClick = { combinedAnchor.value = if (toExpanded) null else "to" },
+                            onDismissRequest = { combinedAnchor.value = null },
+                            onStationSelected = { station ->
+                                viewModel.onAction(FareCalculatorAction.UpdateToStation(station))
+                                combinedAnchor.value = null
                             }
-                        }
+                        )
                     }
                 }
 
@@ -316,47 +269,153 @@ fun StationChip(
     value: String,
     color: Color,
     leading: ImageVector,
+    expanded: Boolean,
+    stations: List<Station>,
+    selectedStationId: Int?,
     onClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    onStationSelected: (Station) -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = MaterialTheme.colorScheme.onSurface
+    BoxWithConstraints(modifier = modifier) {
+        var anchorHeightPx by remember { mutableStateOf(0) }
+        val arrowRotation by animateFloatAsState(
+            targetValue = if (expanded) 180f else 0f,
+            animationSpec = tween(durationMillis = 180),
+            label = "station_dropdown_arrow"
         )
-        Card(
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-            modifier = Modifier
-                .fillMaxWidth()
-                .glassSurface(RoundedCornerShape(18.dp))
-                .sizeIn(minWidth = 140.dp, minHeight = 58.dp)
-                .semantics { contentDescription = "$label: $value" }
-                .clickable(onClick = onClick)
+
+        Column(
+            modifier = Modifier.onGloballyPositioned { anchorHeightPx = it.size.height },
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Card(
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .frostedGlassSurface(RoundedCornerShape(18.dp))
+                    .sizeIn(minWidth = 140.dp, minHeight = 58.dp)
+                    .semantics { contentDescription = "$label: $value" }
+                    .clickable(onClick = onClick)
             ) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = color.copy(alpha = 0.18f)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(imageVector = leading, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = color.copy(alpha = 0.18f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(imageVector = leading, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1
+                    )
+                    Surface(
+                        modifier = Modifier.size(34.dp).glassSurface(CircleShape),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = stringResource(Res.string.chooseStationAccessibility, label),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(27.dp).rotate(arrowRotation)
+                            )
+                        }
                     }
                 }
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1
-                )
-                Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = stringResource(Res.string.chooseStationAccessibility, label), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        if (expanded) {
+            Popup(
+                alignment = Alignment.TopStart,
+                offset = IntOffset(0, anchorHeightPx),
+                onDismissRequest = onDismissRequest,
+                properties = PopupProperties(focusable = true)
+            ) {
+                val menuShape = RoundedCornerShape(20.dp)
+                Card(
+                    modifier = Modifier
+                        .width(maxWidth)
+                        .frostedGlassSurface(menuShape),
+                    shape = menuShape,
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(10.dp)) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f))
+                        if (stations.isEmpty()) {
+                            Text(
+                                text = value,
+                                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
+                                contentPadding = PaddingValues(vertical = 5.dp)
+                            ) {
+                                items(stations, key = { it.id }) { station ->
+                                    val selected = selectedStationId == station.id
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(
+                                                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                                else Color.Transparent
+                                            )
+                                            .clickable { onStationSelected(station) }
+                                            .heightIn(min = 48.dp)
+                                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = StationService.translate(station.name),
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                                            ),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        if (selected) {
+                                            Text(
+                                                text = "✓",
+                                                color = MaterialTheme.colorScheme.primary,
+                                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

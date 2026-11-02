@@ -6,7 +6,15 @@ on:
     branches:
       - master
     paths:
+      - 'androidApp/**'
       - 'composeApp/build.gradle.kts'
+      - 'composeApp/src/**'
+      - 'gradle/libs.versions.toml'
+      - 'gradle/wrapper/gradle-wrapper.properties'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'CHANGELOG.md'
+      - '.github/workflows/build-apk.yml'
 
 permissions:
   contents: write
@@ -46,18 +54,18 @@ jobs:
             echo "Missing GitHub Actions secret: KEYSTORE_BASE64" >&2
             exit 1
           fi
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > composeApp/keystore.jks
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > androidApp/keystore.jks
 
       - name: Build signed release APK and bundle
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: './gradlew :composeApp:assembleRelease :composeApp:bundleRelease --no-daemon'
+        run: './gradlew :androidApp:assembleRelease :androidApp:bundleRelease --no-daemon'
 
       - name: Verify APK signature
         run: |
-          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose composeApp/build/outputs/apk/release/composeApp-release.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose androidApp/build/outputs/apk/release/androidApp-release.apk
 
       - name: Publish production release
         env:
@@ -66,12 +74,12 @@ jobs:
           if [ "$GITHUB_REF_TYPE" = "tag" ]; then
             tag="$GITHUB_REF_NAME"
           else
-            version=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' composeApp/build.gradle.kts | head -n 1)
+            version=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' androidApp/build.gradle.kts | head -n 1)
             tag="v$version"
           fi
 
-          apk="composeApp/build/outputs/apk/release/composeApp-release.apk"
-          bundle="composeApp/build/outputs/bundle/release/composeApp-release.aab"
+          apk="androidApp/build/outputs/apk/release/androidApp-release.apk"
+          bundle="androidApp/build/outputs/bundle/release/androidApp-release.aab"
           title="MRT Buddy $tag"
 
           if gh release view "$tag" >/dev/null 2>&1; then
