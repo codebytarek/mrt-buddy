@@ -57,7 +57,10 @@ android {
 }
 
 dependencies {
-    implementation(projects.composeApp)
+    implementation(projects.composeApp) {
+        // The Android release lint classpath must not resolve the desktop-only WebView backend.
+        exclude(group = "io.github.kevinnzou", module = "compose-webview-multiplatform-desktop")
+    }
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.koin.android)
