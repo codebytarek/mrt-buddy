@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.koin.android)
     implementation(libs.napier)
+    implementation(compose.uiToolingPreview)
     debugImplementation(compose.uiTooling)
 }
 

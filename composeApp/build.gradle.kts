@@ -20,6 +20,7 @@ kotlin {
         androidResources {
             enable = true
         }
+        withHostTest { }
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
