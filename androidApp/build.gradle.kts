@@ -62,8 +62,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.koin.android)
     implementation(libs.napier)
-    implementation(compose.uiToolingPreview)
-    debugImplementation(compose.uiTooling)
+    debugImplementation("org.jetbrains.compose.ui:ui-tooling")
 }
 
 tasks.named("preBuild").configure {
