@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.38
+
+- Removed the History page's card-deleted success notification; card list updates remain visible immediately.
+- Removed unused English and Bengali card-deleted success strings and success events.
+
 ## v0.0.37
 
 - Upgraded Android Gradle Plugin and Gradle to supported releases for Android API 37.

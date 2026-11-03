@@ -48,7 +48,6 @@ class HistoryScreenViewModel(
             is HistoryScreenAction.RenameCard -> viewModelScope.launch {
                 try {
                     transactionRepository.renameCard(action.cardIdm, action.newName)
-                    _events.send(HistoryScreenEvent.RenameSuccess)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -59,7 +58,6 @@ class HistoryScreenViewModel(
             is HistoryScreenAction.DeleteCard -> viewModelScope.launch {
                 try {
                     transactionRepository.deleteCard(action.cardIdm)
-                    _events.send(HistoryScreenEvent.DeleteSuccess)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {

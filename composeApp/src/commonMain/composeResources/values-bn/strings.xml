@@ -179,7 +179,6 @@
     <string name="historyLoadError">এই কার্ডের লেনদেনের ইতিহাস লোড করা যায়নি। আবার চেষ্টা করুন।</string>
     <string name="renameCardError">কার্ডের নাম পরিবর্তন করা যায়নি। আবার চেষ্টা করুন।</string>
     <string name="deleteCardError">কার্ডটি মোছা যায়নি। আবার চেষ্টা করুন।</string>
-    <string name="cardDeleted">কার্ড মোছা হয়েছে।</string>
     <string name="scanCardPrompt">শুরু করতে ব্যালেন্স ট্যাবে একটি কার্ড স্ক্যান করুন।\n\nএরপর এখানে ফিরে আসুন।</string>
     <string name="noTransactionsFound">কোনো লেনদেন পাওয়া যায়নি</string>
     <string name="transactionsAppearPrompt">কার্ডটি অন্তত দুইবার ব্যবহার করার পর লেনদেনগুলো এখানে দেখা যাবে।</string>

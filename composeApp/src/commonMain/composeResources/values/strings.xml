@@ -179,7 +179,6 @@
     <string name="historyLoadError">Couldn't load this card's history. Please try again.</string>
     <string name="renameCardError">Couldn't rename this card. Please try again.</string>
     <string name="deleteCardError">Couldn't delete this card. Please try again.</string>
-    <string name="cardDeleted">Card deleted.</string>
     <string name="scanCardPrompt">Scan a card in the Balance tab to get started.\n\nCome back here afterwards.</string>
     <string name="noTransactionsFound">No transactions found</string>
     <string name="transactionsAppearPrompt">Your transactions will appear here after your card has been scanned at least twice.</string>

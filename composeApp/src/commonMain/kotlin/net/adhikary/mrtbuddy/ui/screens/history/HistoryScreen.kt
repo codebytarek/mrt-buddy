@@ -77,7 +77,6 @@ import mrtbuddy.composeapp.generated.resources.lowBalanceWarning
 import mrtbuddy.composeapp.generated.resources.historyLoadError
 import mrtbuddy.composeapp.generated.resources.renameCardError
 import mrtbuddy.composeapp.generated.resources.deleteCardError
-import mrtbuddy.composeapp.generated.resources.cardDeleted
 import net.adhikary.mrtbuddy.translateNumber
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.theme.frostedGlassSurface
@@ -101,7 +100,6 @@ fun HistoryScreen(
     val loadErrorText = stringResource(Res.string.historyLoadError)
     val renameErrorText = stringResource(Res.string.renameCardError)
     val deleteErrorText = stringResource(Res.string.deleteCardError)
-    val deleteSuccessText = stringResource(Res.string.cardDeleted)
 
     LaunchedEffect(viewModel, refreshKey) {
         if (refreshKey) viewModel.onAction(HistoryScreenAction.OnInit)
@@ -123,7 +121,7 @@ fun HistoryScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText, deleteSuccessText) {
+    LaunchedEffect(viewModel, loadErrorText, renameErrorText, deleteErrorText) {
         viewModel.events.collect { event ->
             when (event) {
                 is HistoryScreenEvent.Error -> {
@@ -135,8 +133,6 @@ fun HistoryScreen(
                     }
                     snackbarHostState.showSnackbar(message)
                 }
-                HistoryScreenEvent.RenameSuccess -> Unit
-                HistoryScreenEvent.DeleteSuccess -> snackbarHostState.showSnackbar(deleteSuccessText)
                 is HistoryScreenEvent.ShowRenameDialog -> Unit
             }
         }
