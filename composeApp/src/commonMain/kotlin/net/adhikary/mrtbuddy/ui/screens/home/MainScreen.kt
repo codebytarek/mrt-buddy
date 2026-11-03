@@ -2,25 +2,28 @@ package net.adhikary.mrtbuddy.ui.screens.home
 
 import MoreScreen
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,7 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -78,8 +83,6 @@ import net.adhikary.mrtbuddy.ui.components.CardIcon
 import net.adhikary.mrtbuddy.ui.components.HistoryIcon
 import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
-import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
-import net.adhikary.mrtbuddy.ui.theme.navigationGlassHighlight
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
@@ -100,6 +103,14 @@ import mrtbuddy.composeapp.generated.resources.notAvailable
 import net.adhikary.mrtbuddy.nfc.service.StationService
 import net.adhikary.mrtbuddy.translateNumber
 import net.adhikary.mrtbuddy.model.TransactionType
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import androidx.compose.ui.unit.Dp
 
 
 enum class Screen(val title: StringResource) {
@@ -126,120 +137,186 @@ fun MainScreen(
         var selectedCardIdm by rememberSaveable { mutableStateOf<String?>(null) }
         val hasTransactions = uiState.hasVisibleCurrentScanHistory
 
+        val backdrop = rememberLayerBackdrop()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            bottomBar = {
-                ModernNavigationBar(currentScreen, navController)
-            }
-        ) { paddingValues ->
-            val layoutDirection = LocalLayoutDirection.current
-            val pagePadding = PaddingValues(
-                start = paddingValues.calculateStartPadding(layoutDirection),
-                top = paddingValues.calculateTopPadding(),
-                end = paddingValues.calculateEndPadding(layoutDirection),
-                bottom = 0.dp
-            )
-            val scrollBehindNavigationPadding = paddingValues.calculateBottomPadding()
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home.name,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                composable(route = Screen.Home.name) {
-                    ModernHomeScreen(
-                        uiState = uiState,
-                        hasTransactions = hasTransactions,
-                        paddingValues = pagePadding,
-                        bottomContentPadding = scrollBehindNavigationPadding
+            Box(Modifier.fillMaxSize()) {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize().layerBackdrop(backdrop),
+                    containerColor = Color.Transparent
+                ) { paddingValues ->
+                    val layoutDirection = LocalLayoutDirection.current
+                    val pagePadding = PaddingValues(
+                        start = paddingValues.calculateStartPadding(layoutDirection),
+                        top = paddingValues.calculateTopPadding(),
+                        end = paddingValues.calculateEndPadding(layoutDirection),
+                        bottom = 0.dp
                     )
-                }
+                    val scrollBehindNavigationPadding = 90.dp + paddingValues.calculateBottomPadding()
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.Home.name,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        composable(route = Screen.Home.name) {
+                            ModernHomeScreen(
+                                uiState = uiState,
+                                hasTransactions = hasTransactions,
+                                paddingValues = pagePadding,
+                                bottomContentPadding = scrollBehindNavigationPadding
+                            )
+                        }
 
-                composable(route = Screen.Calculator.name) {
-                    FareCalculatorScreen(
-                        cardState = uiState.cardState,
-                        modifier = Modifier.padding(pagePadding),
-                        bottomContentPadding = scrollBehindNavigationPadding
-                    )
-                }
+                        composable(route = Screen.Calculator.name) {
+                            FareCalculatorScreen(
+                                cardState = uiState.cardState,
+                                modifier = Modifier.padding(pagePadding),
+                                bottomContentPadding = scrollBehindNavigationPadding
+                            )
+                        }
 
-                composable(route = Screen.More.name) {
-                    MoreScreen(
-                        onNavigateToStationMap = {
-                            navController.navigate(Screen.StationMap.name)
-                        },
-                        onNavigateToLicenses = {
-                            navController.navigate(Screen.Licenses.name)
-                        },
-                        modifier = Modifier.padding(pagePadding),
-                        bottomContentPadding = scrollBehindNavigationPadding
-                    )
-                }
+                        composable(route = Screen.More.name) {
+                            MoreScreen(
+                                onNavigateToStationMap = {
+                                    navController.navigate(Screen.StationMap.name)
+                                },
+                                onNavigateToLicenses = {
+                                    navController.navigate(Screen.Licenses.name)
+                                },
+                                modifier = Modifier.padding(pagePadding),
+                                bottomContentPadding = scrollBehindNavigationPadding
+                            )
+                        }
 
-                composable(route = Screen.History.name) {
-                    HistoryScreen(
-                        onCardSelected = { cardIdm ->
-                            selectedCardIdm = cardIdm
-                            navController.navigate(Screen.TransactionList.name)
-                        },
-                        modifier = Modifier.padding(pagePadding),
-                        refreshKey = currentScreen == Screen.History,
-                        bottomContentPadding = scrollBehindNavigationPadding
-                    )
-                }
+                        composable(route = Screen.History.name) {
+                            HistoryScreen(
+                                onCardSelected = { cardIdm ->
+                                    selectedCardIdm = cardIdm
+                                    navController.navigate(Screen.TransactionList.name)
+                                },
+                                modifier = Modifier.padding(pagePadding),
+                                refreshKey = currentScreen == Screen.History,
+                                bottomContentPadding = scrollBehindNavigationPadding
+                            )
+                        }
 
-                composable(route = Screen.TransactionList.name) {
-                    selectedCardIdm?.let { cardIdm ->
-                        TransactionListScreen(
-                            cardIdm = cardIdm,
-                            onBack = {
-                                navController.navigateUp()
-                            },
-                            paddingValues = paddingValues
-                        )
+                        composable(route = Screen.TransactionList.name) {
+                            selectedCardIdm?.let { cardIdm ->
+                                TransactionListScreen(
+                                    cardIdm = cardIdm,
+                                    onBack = {
+                                        navController.navigateUp()
+                                    },
+                                    paddingValues = paddingValues
+                                )
+                            }
+                        }
+
+                        composable(route = Screen.StationMap.name) {
+                            StationMapScreen(
+                                onBack = {
+                                    navController.navigateUp()
+                                },
+                                modifier = Modifier.padding(pagePadding)
+                            )
+                        }
+
+                        composable(route = Screen.Licenses.name) {
+                            OpenSourceLicensesScreen(
+                                onBack = {
+                                    navController.navigateUp()
+                                },
+                                modifier = Modifier.padding(pagePadding),
+                                paddingValues = paddingValues
+                            )
+                        }
                     }
                 }
-
-                composable(route = Screen.StationMap.name) {
-                    StationMapScreen(
-                        onBack = {
-                            navController.navigateUp()
-                        },
-                        modifier = Modifier.padding(pagePadding)
-                    )
-                }
-
-                composable(route = Screen.Licenses.name) {
-                    OpenSourceLicensesScreen(
-                        onBack = {
-                            navController.navigateUp()
-                        },
-                        modifier = Modifier.padding(pagePadding),
-                        paddingValues = paddingValues
-                    )
-                }
+                ModernNavigationBar(
+                    currentScreen = currentScreen,
+                    navController = navController,
+                    backdrop = backdrop,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
-        }
+    }
 }
 
 @Composable
 private fun ModernNavigationBar(
     currentScreen: Screen,
-    navController: NavHostController
+    navController: NavHostController,
+    backdrop: Backdrop,
+    modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(42.dp)
-    Box(
-        modifier = Modifier
+    val selectedIndex = when (currentScreen) {
+        Screen.Calculator -> 0
+        Screen.Home -> 1
+        Screen.History, Screen.TransactionList -> 2
+        else -> 3
+    }
+    val shape = RoundedCornerShape(31.dp)
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val edgeColor = if (dark) Color.White.copy(alpha = 0.34f) else Color.White.copy(alpha = 0.76f)
+    BoxWithConstraints(
+        modifier = modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
-            .navigationGlassSurface(shape)
-            .navigationGlassHighlight(shape)
+            .navigationBarsPadding()
+            .padding(horizontal = 14.dp, bottom = 14.dp)
     ) {
+        val itemWidth = (maxWidth - 8.dp) / 4
+        val selectedOffset by animateDpAsState(
+            targetValue = 4.dp + itemWidth * selectedIndex,
+            animationSpec = spring(dampingRatio = 0.6f),
+            label = "navigation_selection_offset"
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(62.dp)
+                .drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { shape },
+                    effects = {
+                        vibrancy()
+                        blur(8.dp.toPx())
+                        lens(12.dp.toPx(), 24.dp.toPx())
+                    },
+                    onDrawSurface = {
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    Color.White.copy(alpha = if (dark) 0.24f else 0.42f),
+                                    Color.White.copy(alpha = if (dark) 0.08f else 0.14f)
+                                )
+                            )
+                        )
+                    }
+                )
+                .border(1.dp, edgeColor, shape)
+        ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset(x = selectedOffset)
+                .width(itemWidth)
+                .height(50.dp)
+                .drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { RoundedCornerShape(26.dp) },
+                    effects = {
+                        vibrancy()
+                        blur(8.dp.toPx())
+                        lens(12.dp.toPx(), 24.dp.toPx())
+                    },
+                    onDrawSurface = {
+                        drawRect(Color.White.copy(alpha = if (dark) 0.22f else 0.50f))
+                    }
+                )
+                .border(1.dp, edgeColor.copy(alpha = 0.65f), RoundedCornerShape(26.dp))
+        )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp).height(66.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 3.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -274,6 +351,7 @@ private fun ModernNavigationBar(
                 onClick = { navigateToScreen(navController, Screen.More) }
             )
         }
+        }
     }
 }
 
@@ -286,7 +364,7 @@ private fun GlassNavigationItem(
     onClick: () -> Unit
 ) {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val selectedColor = Color(0xFFD32F3F)
+    val selectedColor = if (dark) Color(0xFFEF5350) else Color(0xFFD32F2F)
     val iconColor = if (selected) selectedColor else if (dark) MaterialTheme.colorScheme.onSurface else Color(0xFF17191B)
     val iconScale by animateFloatAsState(
         targetValue = if (selected) 1.08f else 1f,

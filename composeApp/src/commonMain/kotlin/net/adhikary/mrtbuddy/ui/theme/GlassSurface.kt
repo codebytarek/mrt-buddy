@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.MaterialTheme
@@ -130,54 +131,31 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
         )
 }
 
-/** Frosted balance surface using the navigation glass treatment without its drop shadow. */
+/** Opaque frosted balance surface with the navigation bar's soft highlight, without a drop shadow. */
 fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val base = MaterialTheme.colorScheme.surface
-    val fill = if (dark) {
-        Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to Color.White.copy(alpha = 0.24f),
-                0.08f to base.copy(alpha = 0.84f),
-                0.48f to base.copy(alpha = 0.76f),
-                1f to base.copy(alpha = 0.90f)
-            )
-        )
+    val colors = MaterialTheme.colorScheme
+    // Keep the balance area fully opaque so scrolling history never shows through it. A
+    // uniform frosted body also avoids a dark lower band that reads like a box shadow.
+    val frost = if (dark) {
+        lerp(colors.surfaceContainerHigh, colors.surface, 0.35f)
     } else {
-        Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to Color.White.copy(alpha = 0.80f),
-                0.10f to Color.White.copy(alpha = 0.62f),
-                0.56f to Color.White.copy(alpha = 0.52f),
-                1f to Color.White.copy(alpha = 0.68f)
-            )
-        )
+        lerp(colors.surfaceContainerLow, Color.White, 0.82f)
     }
 
     this
         .clip(shape)
-        .background(fill, shape)
+        .background(frost, shape)
         .drawBehind {
-            // Keep the soft upper reflection and side sheen from the nav bar, but omit its
-            // dark lower fade so the balance display does not read as a shadowed box.
+            // A restrained top reflection and inner rim give the solid surface a frosted
+            // glass finish without adding a drop shadow or metallic lower-edge sheen.
             drawRect(
                 brush = Brush.verticalGradient(
                     colorStops = arrayOf(
-                        0f to Color.White.copy(alpha = if (dark) 0.30f else 0.44f),
-                        0.12f to Color.White.copy(alpha = if (dark) 0.12f else 0.20f),
-                        0.42f to Color.Transparent,
+                        0f to Color.White.copy(alpha = if (dark) 0.12f else 0.26f),
+                        0.08f to Color.White.copy(alpha = if (dark) 0.045f else 0.10f),
+                        0.22f to Color.Transparent,
                         1f to Color.Transparent
-                    )
-                ),
-                size = Size(size.width, size.height)
-            )
-            drawRect(
-                brush = Brush.horizontalGradient(
-                    listOf(
-                        Color.White.copy(alpha = if (dark) 0.10f else 0.22f),
-                        Color.Transparent,
-                        Color.Transparent,
-                        Color.White.copy(alpha = if (dark) 0.07f else 0.16f)
                     )
                 ),
                 size = Size(size.width, size.height)
@@ -185,13 +163,7 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
         }
         .border(
             width = 1.dp,
-            brush = Brush.verticalGradient(
-                listOf(
-                    Color.White.copy(alpha = if (dark) 0.76f else 0.94f),
-                    Color.White.copy(alpha = if (dark) 0.38f else 0.54f),
-                    Color.White.copy(alpha = if (dark) 0.22f else 0.42f)
-                )
-            ),
+            color = if (dark) Color.White.copy(alpha = 0.20f) else colors.outlineVariant.copy(alpha = 0.24f),
             shape = shape
         )
 }

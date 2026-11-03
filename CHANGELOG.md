@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.46
+
+- Added a shared floating Liquid Glass bottom navigation bar with backdrop blur, animated selection, and consistent spacing across screens.
+- Refined the Balance card with a brighter opaque frosted surface and removed its external/drop shadow.
+- Restored the MRT Buddy app label and the round green train launcher icon.
+
 ## v0.0.45
 
 - Restored the Balance card's frosted Liquid Glass surface to match the bottom navigation, without an external shadow or lower shadow fade.

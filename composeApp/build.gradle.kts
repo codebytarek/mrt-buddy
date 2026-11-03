@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.multiplatform.settings)
             implementation(libs.navigation.compose)
+            implementation("io.github.kyant0:backdrop:2.0.1")
 
             api(libs.koin.core)
             implementation(libs.koin.compose)
