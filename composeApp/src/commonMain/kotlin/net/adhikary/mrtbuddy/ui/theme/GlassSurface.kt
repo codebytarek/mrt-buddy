@@ -98,18 +98,19 @@ fun Modifier.navigationGlassHighlight(shape: Shape): Modifier = composed {
 /** Shared translucent glass styling for information surfaces and floating controls. */
 fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    // A strong white wash reads as a flat rectangle in light mode instead of glass.
-    val topHighlight = Color.White.copy(alpha = if (dark) 0.22f else 0.14f)
-    val middleTint = MaterialTheme.colorScheme.surface.copy(alpha = if (dark) 0.13f else 0.08f)
-    val lowerTint = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (dark) 0.20f else 0.07f)
-    val edge = Color.White.copy(alpha = if (dark) 0.36f else 0.32f)
-    val edgeBottom = Color.White.copy(alpha = bottomEdgeAlpha ?: if (dark) 0.08f else 0.06f)
+    val colors = MaterialTheme.colorScheme
+    // Use Monet's tonal surfaces for the body and keep the reflection restrained.
+    val topHighlight = Color.White.copy(alpha = if (dark) 0.035f else 0.08f)
+    val middleTint = colors.surfaceContainerHigh.copy(alpha = if (dark) 0.58f else 0.64f)
+    val lowerTint = colors.surfaceContainerLow.copy(alpha = if (dark) 0.48f else 0.56f)
+    val edge = colors.outlineVariant.copy(alpha = if (dark) 0.58f else 0.48f)
+    val edgeBottom = colors.outlineVariant.copy(alpha = bottomEdgeAlpha ?: if (dark) 0.32f else 0.28f)
     this
         .shadow(
-            elevation = if (dark) 10f.dp else 6f.dp,
+            elevation = if (dark) 7f.dp else 5f.dp,
             shape = shape,
-            ambientColor = Color.Black.copy(alpha = if (dark) 0.20f else 0.07f),
-            spotColor = Color.Black.copy(alpha = if (dark) 0.24f else 0.06f)
+            ambientColor = Color.Black.copy(alpha = if (dark) 0.15f else 0.045f),
+            spotColor = Color.Black.copy(alpha = if (dark) 0.17f else 0.055f)
         )
         .clip(shape)
         .background(
@@ -121,8 +122,63 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
             brush = Brush.verticalGradient(
                 colorStops = arrayOf(
                     0f to edge,
-                    0.72f to Color.White.copy(alpha = if (dark) 0.20f else 0.28f),
+                    0.72f to colors.outlineVariant.copy(alpha = if (dark) 0.36f else 0.30f),
                     1f to edgeBottom
+                )
+            ),
+            shape = shape
+        )
+}
+
+/** Frosted balance display: keeps the existing card shape while using visible Monet surfaces. */
+fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val colors = MaterialTheme.colorScheme
+    val fill = Brush.verticalGradient(
+        colorStops = if (dark) {
+            arrayOf(
+                0f to colors.surfaceContainerHigh.copy(alpha = 0.78f),
+                0.18f to colors.surfaceContainer.copy(alpha = 0.72f),
+                0.72f to colors.surfaceContainerLow.copy(alpha = 0.70f),
+                1f to colors.surfaceContainerHigh.copy(alpha = 0.78f)
+            )
+        } else {
+            arrayOf(
+                0f to colors.surfaceContainerLow.copy(alpha = 0.78f),
+                0.18f to colors.surface.copy(alpha = 0.72f),
+                0.72f to colors.surfaceContainer.copy(alpha = 0.72f),
+                1f to colors.surfaceContainerHigh.copy(alpha = 0.80f)
+            )
+        }
+    )
+    this
+        .shadow(
+            elevation = if (dark) 9.dp else 7.dp,
+            shape = shape,
+            ambientColor = Color.Black.copy(alpha = if (dark) 0.18f else 0.06f),
+            spotColor = Color.Black.copy(alpha = if (dark) 0.20f else 0.075f)
+        )
+        .clip(shape)
+        .background(fill, shape)
+        .drawBehind {
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        colors.primary.copy(alpha = if (dark) 0.035f else 0.06f),
+                        Color.Transparent,
+                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.07f)
+                    )
+                ),
+                size = Size(size.width, size.height)
+            )
+        }
+        .border(
+            width = 1.dp,
+            brush = Brush.verticalGradient(
+                listOf(
+                    colors.outlineVariant.copy(alpha = if (dark) 0.62f else 0.58f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.36f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.50f else 0.48f)
                 )
             ),
             shape = shape

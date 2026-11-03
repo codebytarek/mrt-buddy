@@ -13,7 +13,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -118,8 +117,7 @@ import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
-import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
-import net.adhikary.mrtbuddy.ui.theme.navigationGlassHighlight
+import net.adhikary.mrtbuddy.ui.theme.balanceGlassSurface
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
 
@@ -141,8 +139,7 @@ fun BalanceCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .scale(animatedScale)
-            .navigationGlassSurface(RoundedCornerShape(28.dp))
-            .navigationGlassHighlight(RoundedCornerShape(28.dp)),
+            .balanceGlassSurface(RoundedCornerShape(28.dp)),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(28.dp), // More rounded corners
         colors = CardDefaults.cardColors(
@@ -153,7 +150,7 @@ fun BalanceCard(
             // Enhanced gradient header for Balance state with improved design
             if (!cardName.isNullOrBlank() && cardState is CardState.Balance) {
                 val isRapidPass = cardIdm?.let { isRapidPassIdm(it) } ?: false
-                val isDarkTheme = isSystemInDarkTheme()
+                val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
                 val cardColor = if (isRapidPass) {
                     if (isDarkTheme) DarkRapidPass else LightRapidPass
                 } else {

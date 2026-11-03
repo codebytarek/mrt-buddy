@@ -12,17 +12,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.luminance
 
 /** Soft accent light behind translucent app surfaces; clipped to the app window. */
 @Composable
 fun GlassBackdrop() {
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val base = if (dark) Color(0xFF101D25) else Color(0xFFEEF8F7)
-    val teal = if (dark) Color(0xFF176B78) else Color(0xFF70C7D0)
-    val warm = if (dark) Color(0xFF9A5527) else Color(0xFFFFB263)
+    val colors = MaterialTheme.colorScheme
+    val dark = colors.surface.luminance() < 0.5f
+    val base = colors.background
+    val middle = colors.surface
+    val primaryGlow = colors.primary
+    val tertiaryGlow = colors.tertiary
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -30,7 +32,7 @@ fun GlassBackdrop() {
                 Brush.verticalGradient(
                     listOf(
                         base,
-                        if (dark) Color(0xFF172832) else Color(0xFFF4F8F4),
+                        middle,
                         base
                     )
                 )
@@ -44,8 +46,8 @@ fun GlassBackdrop() {
                 .background(
                     Brush.radialGradient(
                         listOf(
-                            teal.copy(alpha = if (dark) 0.24f else 0.32f),
-                            teal.copy(alpha = 0.10f),
+                            primaryGlow.copy(alpha = if (dark) 0.13f else 0.18f),
+                            primaryGlow.copy(alpha = if (dark) 0.05f else 0.07f),
                             Color.Transparent
                         )
                     ),
@@ -61,8 +63,8 @@ fun GlassBackdrop() {
                 .background(
                     Brush.radialGradient(
                         listOf(
-                            warm.copy(alpha = if (dark) 0.19f else 0.27f),
-                            warm.copy(alpha = 0.08f),
+                            tertiaryGlow.copy(alpha = if (dark) 0.12f else 0.16f),
+                            tertiaryGlow.copy(alpha = if (dark) 0.04f else 0.06f),
                             Color.Transparent
                         )
                     ),

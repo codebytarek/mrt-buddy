@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.39
+
+- Use Android Monet colors for the app backdrop and frosted glass surfaces, including the scanned balance card.
+- Soften upper-edge reflections and outlines to make glass surfaces feel frosted rather than metallic.
+- Use consistent recharge green and theme-appropriate spending red colors, independent of wallpaper colors.
+
 ## v0.0.38
 
 - Removed the History page's card-deleted success notification; card list updates remain visible immediately.

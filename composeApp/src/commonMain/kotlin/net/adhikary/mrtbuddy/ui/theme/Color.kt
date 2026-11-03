@@ -9,7 +9,7 @@ val white98 = Color(0xFAFFFFFF)
 val LightRapidPass = Color(0xFF2196F3)  // Blue color for Rapid Pass
 val LightMRTPass = Color(0xFF408E2D)  // Green color for MRT Pass
 val LightPositiveGreen = Color(0xFF4CAF50)
-val LightNegativeRed = Color(0xFFB00020)
+val LightNegativeRed = Color(0xFFD32F2F)
 val lowBalanceOrange = Color(0xFFF97316)
 val Alert_yellow_L = Color(0xFFFFBF00)
 
@@ -54,7 +54,7 @@ val surfaceContainerHighestLight = Color(0xFFFFFFFF)
 val DarkRapidPass = Color(0xFF42A5F5)  // Slightly lighter blue for dark theme
 val DarkMRTPass = Color(0xFF4CAF50)  // Slightly lighter green for dark theme
 val DarkPositiveGreen = Color(0xFF81C784)
-val DarkNegativeRed = Color(0xFFCF6679)
+val DarkNegativeRed = Color(0xFFEF5350)
 val Alert_yellow_D = Color(0xFFFFEB3B)
 
 // Dark Theme Material Colors
