@@ -1,4 +1,10 @@
 # Changelog
+## v0.0.48
+
+- Matched the bottom navigation selection animation to the HTML preview with a smoother 450 ms eased transition and a single soft overshoot.
+- Set the launcher activity's display name and icon explicitly so Android uses the MRT Buddy branding during installation and launch.
+- Refined the Balance card's frosted-glass fill and removed its box-like external shadow while preserving its shape.
+
 ## v0.0.47
 
 - Restored app screens, behavior, and launcher assets to the v0.0.40 baseline.

@@ -137,36 +137,31 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
     val fill = Brush.verticalGradient(
         colorStops = if (dark) {
             arrayOf(
-                0f to colors.surfaceBright,
-                0.18f to colors.surfaceContainerHigh,
-                0.72f to colors.surfaceContainer,
-                1f to colors.surfaceBright
+                0f to Color.White.copy(alpha = 0.24f),
+                0.08f to colors.surface.copy(alpha = 0.88f),
+                0.48f to colors.surface.copy(alpha = 0.82f),
+                1f to colors.surface.copy(alpha = 0.92f)
             )
         } else {
             arrayOf(
-                0f to Color.White,
-                0.18f to colors.surfaceContainerHighest,
-                0.72f to colors.surfaceBright,
-                1f to Color.White
+                0f to Color.White.copy(alpha = 0.96f),
+                0.10f to Color.White.copy(alpha = 0.93f),
+                0.56f to Color.White.copy(alpha = 0.88f),
+                1f to Color.White.copy(alpha = 0.94f)
             )
         }
     )
     this
-        .shadow(
-            elevation = if (dark) 9.dp else 7.dp,
-            shape = shape,
-            ambientColor = Color.Black.copy(alpha = if (dark) 0.18f else 0.06f),
-            spotColor = Color.Black.copy(alpha = if (dark) 0.20f else 0.075f)
-        )
         .clip(shape)
         .background(fill, shape)
         .drawBehind {
             drawRect(
-                brush = Brush.horizontalGradient(
+                brush = Brush.verticalGradient(
                     listOf(
-                        colors.primary.copy(alpha = if (dark) 0.035f else 0.025f),
+                        Color.White.copy(alpha = if (dark) 0.18f else 0.34f),
+                        Color.White.copy(alpha = if (dark) 0.06f else 0.10f),
                         Color.Transparent,
-                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.025f)
+                        Color.Transparent
                     )
                 ),
                 size = Size(size.width, size.height)
@@ -176,13 +171,14 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
             width = 1.dp,
             brush = Brush.verticalGradient(
                 listOf(
-                    colors.outlineVariant.copy(alpha = if (dark) 0.62f else 0.58f),
-                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.36f),
-                    colors.outlineVariant.copy(alpha = if (dark) 0.50f else 0.48f)
+                    Color.White.copy(alpha = if (dark) 0.68f else 0.90f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.38f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.34f else 0.42f)
                 )
             ),
             shape = shape
         )
+        .navigationGlassHighlight(shape)
 }
 
 /** Opaque frosted-glass treatment for controls and dialogs whose contents must stay easy to read. */

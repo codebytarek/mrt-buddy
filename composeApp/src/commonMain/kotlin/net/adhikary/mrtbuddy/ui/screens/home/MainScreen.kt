@@ -3,7 +3,7 @@ package net.adhikary.mrtbuddy.ui.screens.home
 import MoreScreen
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
@@ -273,7 +273,12 @@ private fun ModernNavigationBar(
         val itemWidth = (maxWidth - 12.dp) / 4
         val selectedOffset by animateDpAsState(
             targetValue = 6.dp + itemWidth * selectedIndex,
-            animationSpec = spring(dampingRatio = 0.6f),
+            // Match the HTML preview's single, soft overshoot without the
+            // repeated bounce of a low-damping spring.
+            animationSpec = tween(
+                durationMillis = 450,
+                easing = CubicBezierEasing(0.34f, 1.5f, 0.5f, 1f)
+            ),
             label = "navigation_selection_offset"
         )
 
