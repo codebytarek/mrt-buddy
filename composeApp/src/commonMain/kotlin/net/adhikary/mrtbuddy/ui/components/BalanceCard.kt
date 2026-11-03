@@ -553,6 +553,7 @@ private fun ModernReadingContent() {
 
 @Composable
 private fun ModernWaitingContent() {
+    val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -567,7 +568,7 @@ private fun ModernWaitingContent() {
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.52f),
+                                Color.White.copy(alpha = if (isDarkTheme) 0.16f else 0.52f),
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
                                 MaterialTheme.colorScheme.surface.copy(alpha = 0.12f),
                                 Color.Transparent
