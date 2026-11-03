@@ -239,7 +239,6 @@ fun MainScreen(
                 )
             }
         }
-    }
 }
 
 @Composable
@@ -262,7 +261,7 @@ private fun ModernNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 14.dp, bottom = 14.dp)
+            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
     ) {
         val itemWidth = (maxWidth - 8.dp) / 4
         val selectedOffset by animateDpAsState(
