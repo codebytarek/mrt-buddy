@@ -130,52 +130,8 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
         )
 }
 
-/** Frosted balance display: keeps the existing card shape while using visible Monet surfaces. */
-fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val colors = MaterialTheme.colorScheme
-    val fill = Brush.verticalGradient(
-        colorStops = if (dark) {
-            arrayOf(
-                0f to colors.surfaceContainerHigh,
-                0.18f to colors.surfaceContainer,
-                1f to colors.surfaceContainer
-            )
-        } else {
-            arrayOf(
-                0f to Color.White,
-                0.18f to colors.surfaceContainerHigh,
-                1f to Color.White
-            )
-        }
-    )
-    this
-        .clip(shape)
-        .background(fill, shape)
-        .drawBehind {
-            drawRect(
-                brush = Brush.horizontalGradient(
-                    listOf(
-                        colors.primary.copy(alpha = if (dark) 0.035f else 0.025f),
-                        Color.Transparent,
-                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.025f)
-                    )
-                ),
-                size = Size(size.width, size.height)
-            )
-        }
-        .border(
-            width = 0.6.dp,
-            brush = Brush.verticalGradient(
-                listOf(
-                    colors.outlineVariant.copy(alpha = if (dark) 0.30f else 0.25f),
-                    colors.outlineVariant.copy(alpha = if (dark) 0.22f else 0.18f),
-                    colors.outlineVariant.copy(alpha = if (dark) 0.26f else 0.20f)
-                )
-            ),
-            shape = shape
-        )
-}
+/** Clips Balance content to its card shape without drawing an inset panel, halo, or shadow. */
+fun Modifier.balanceGlassSurface(shape: Shape): Modifier = clip(shape)
 
 /** Opaque frosted-glass treatment for controls and dialogs whose contents must stay easy to read. */
 fun Modifier.frostedGlassSurface(shape: Shape): Modifier = composed {

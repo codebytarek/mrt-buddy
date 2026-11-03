@@ -133,24 +133,14 @@ fun BalanceCard(
         label = "card_scale"
     )
 
-    Card(
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .scale(animatedScale)
-            .balanceGlassSurface(RoundedCornerShape(28.dp)),
-        elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 0.dp,
-            focusedElevation = 0.dp,
-            hoveredElevation = 0.dp,
-            draggedElevation = 0.dp,
-            disabledElevation = 0.dp
-        ),
-        shape = RoundedCornerShape(28.dp), // More rounded corners
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
+            // A Material Card still paints a tonal surface in some theme states, even with a
+            // transparent container color. Keep only the rounded clipping for this content.
+            .balanceGlassSurface(RoundedCornerShape(28.dp))
     ) {
         Box(Modifier.fillMaxWidth().wrapContentHeight()) {
             // Enhanced gradient header for Balance state with improved design

@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.44
+
+- Removed the Balance display's gradient, tint, and outline layers that created an inset panel effect.
+- Replaced the Android template robot launcher icon with the existing MRT train artwork and set the launcher activity label to MRT Buddy.
+
 ## v0.0.43
 
 - Disabled Balance card elevation for every interaction state and softened its lower surface edge to remove the remaining shadow-like halo.
