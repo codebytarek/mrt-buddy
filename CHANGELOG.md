@@ -1,4 +1,9 @@
 # Changelog
+## v0.0.47
+
+- Restored app screens, behavior, and launcher assets to the v0.0.40 baseline.
+- Preserved the v0.0.40 bottom navigation size and frosted color treatment, with floating backdrop blur while content scrolls behind it.
+- Added a full-width animated selection capsule sized to each tab slot, including History.
 
 ## v0.0.46
 

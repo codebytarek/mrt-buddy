@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.MaterialTheme
@@ -131,31 +130,43 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
         )
 }
 
-/** Opaque frosted balance surface with the navigation bar's soft highlight, without a drop shadow. */
+/** Frosted balance display: keeps the existing card shape while using visible Monet surfaces. */
 fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val colors = MaterialTheme.colorScheme
-    // Keep the balance area fully opaque so scrolling history never shows through it. A
-    // uniform frosted body also avoids a dark lower band that reads like a box shadow.
-    val frost = if (dark) {
-        lerp(colors.surfaceContainerHigh, colors.surface, 0.35f)
-    } else {
-        lerp(colors.surfaceContainerLow, Color.White, 0.82f)
-    }
-
+    val fill = Brush.verticalGradient(
+        colorStops = if (dark) {
+            arrayOf(
+                0f to colors.surfaceBright,
+                0.18f to colors.surfaceContainerHigh,
+                0.72f to colors.surfaceContainer,
+                1f to colors.surfaceBright
+            )
+        } else {
+            arrayOf(
+                0f to Color.White,
+                0.18f to colors.surfaceContainerHighest,
+                0.72f to colors.surfaceBright,
+                1f to Color.White
+            )
+        }
+    )
     this
+        .shadow(
+            elevation = if (dark) 9.dp else 7.dp,
+            shape = shape,
+            ambientColor = Color.Black.copy(alpha = if (dark) 0.18f else 0.06f),
+            spotColor = Color.Black.copy(alpha = if (dark) 0.20f else 0.075f)
+        )
         .clip(shape)
-        .background(frost, shape)
+        .background(fill, shape)
         .drawBehind {
-            // A restrained top reflection and inner rim give the solid surface a frosted
-            // glass finish without adding a drop shadow or metallic lower-edge sheen.
             drawRect(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0f to Color.White.copy(alpha = if (dark) 0.12f else 0.26f),
-                        0.08f to Color.White.copy(alpha = if (dark) 0.045f else 0.10f),
-                        0.22f to Color.Transparent,
-                        1f to Color.Transparent
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        colors.primary.copy(alpha = if (dark) 0.035f else 0.025f),
+                        Color.Transparent,
+                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.025f)
                     )
                 ),
                 size = Size(size.width, size.height)
@@ -163,7 +174,13 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
         }
         .border(
             width = 1.dp,
-            color = if (dark) Color.White.copy(alpha = 0.20f) else colors.outlineVariant.copy(alpha = 0.24f),
+            brush = Brush.verticalGradient(
+                listOf(
+                    colors.outlineVariant.copy(alpha = if (dark) 0.62f else 0.58f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.36f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.50f else 0.48f)
+                )
+            ),
             shape = shape
         )
 }

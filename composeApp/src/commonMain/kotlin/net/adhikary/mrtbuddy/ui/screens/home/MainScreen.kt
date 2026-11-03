@@ -45,9 +45,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -58,6 +58,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -83,6 +90,8 @@ import net.adhikary.mrtbuddy.ui.components.CardIcon
 import net.adhikary.mrtbuddy.ui.components.HistoryIcon
 import net.adhikary.mrtbuddy.ui.components.StationRouteText
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassSurface
+import net.adhikary.mrtbuddy.ui.theme.navigationGlassHighlight
 import net.adhikary.mrtbuddy.ui.theme.DarkPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.LightPositiveGreen
 import net.adhikary.mrtbuddy.ui.theme.DarkNegativeRed
@@ -103,14 +112,6 @@ import mrtbuddy.composeapp.generated.resources.notAvailable
 import net.adhikary.mrtbuddy.nfc.service.StationService
 import net.adhikary.mrtbuddy.translateNumber
 import net.adhikary.mrtbuddy.model.TransactionType
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import androidx.compose.ui.unit.Dp
 
 
 enum class Screen(val title: StringResource) {
@@ -129,116 +130,118 @@ fun MainScreen(
     viewModel: MainScreenViewModel = koinViewModel(),
     navController: NavHostController = rememberNavController()
 ) {
-        val uiState by viewModel.state.collectAsState()
-        val backStackEntry by navController.currentBackStackEntryAsState()
-        val currentScreen = Screen.valueOf(
-            backStackEntry?.destination?.route ?: Screen.Home.name
-        )
-        var selectedCardIdm by rememberSaveable { mutableStateOf<String?>(null) }
-        val hasTransactions = uiState.hasVisibleCurrentScanHistory
+    val uiState by viewModel.state.collectAsState()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = Screen.valueOf(
+        backStackEntry?.destination?.route ?: Screen.Home.name
+    )
+    var selectedCardIdm by rememberSaveable { mutableStateOf<String?>(null) }
+    val hasTransactions = uiState.hasVisibleCurrentScanHistory
+    val backdrop = rememberLayerBackdrop()
 
-        val backdrop = rememberLayerBackdrop()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Box(Modifier.fillMaxSize()) {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize().layerBackdrop(backdrop),
-                    containerColor = Color.Transparent
-                ) { paddingValues ->
-                    val layoutDirection = LocalLayoutDirection.current
-                    val pagePadding = PaddingValues(
-                        start = paddingValues.calculateStartPadding(layoutDirection),
-                        top = paddingValues.calculateTopPadding(),
-                        end = paddingValues.calculateEndPadding(layoutDirection),
-                        bottom = 0.dp
-                    )
-                    val scrollBehindNavigationPadding = 90.dp + paddingValues.calculateBottomPadding()
-                    NavHost(
-                        navController = navController,
-                        startDestination = Screen.Home.name,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        composable(route = Screen.Home.name) {
-                            ModernHomeScreen(
-                                uiState = uiState,
-                                hasTransactions = hasTransactions,
-                                paddingValues = pagePadding,
-                                bottomContentPadding = scrollBehindNavigationPadding
-                            )
-                        }
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+        Box(Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize().layerBackdrop(backdrop),
+                containerColor = Color.Transparent
+            ) { paddingValues ->
+                val layoutDirection = LocalLayoutDirection.current
+                val pagePadding = PaddingValues(
+                    start = paddingValues.calculateStartPadding(layoutDirection),
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateEndPadding(layoutDirection),
+                    bottom = 0.dp
+                )
+                // Content draws behind the floating bar; this tail padding lets the
+                // last row scroll completely above it while the backdrop stays live.
+                val scrollBehindNavigationPadding = 90.dp + paddingValues.calculateBottomPadding()
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Home.name,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    composable(route = Screen.Home.name) {
+                        ModernHomeScreen(
+                            uiState = uiState,
+                            hasTransactions = hasTransactions,
+                            paddingValues = pagePadding,
+                            bottomContentPadding = scrollBehindNavigationPadding
+                        )
+                    }
 
-                        composable(route = Screen.Calculator.name) {
-                            FareCalculatorScreen(
-                                cardState = uiState.cardState,
-                                modifier = Modifier.padding(pagePadding),
-                                bottomContentPadding = scrollBehindNavigationPadding
-                            )
-                        }
+                    composable(route = Screen.Calculator.name) {
+                        FareCalculatorScreen(
+                            cardState = uiState.cardState,
+                            modifier = Modifier.padding(pagePadding),
+                            bottomContentPadding = scrollBehindNavigationPadding
+                        )
+                    }
 
-                        composable(route = Screen.More.name) {
-                            MoreScreen(
-                                onNavigateToStationMap = {
-                                    navController.navigate(Screen.StationMap.name)
-                                },
-                                onNavigateToLicenses = {
-                                    navController.navigate(Screen.Licenses.name)
-                                },
-                                modifier = Modifier.padding(pagePadding),
-                                bottomContentPadding = scrollBehindNavigationPadding
-                            )
-                        }
+                    composable(route = Screen.More.name) {
+                        MoreScreen(
+                            onNavigateToStationMap = {
+                                navController.navigate(Screen.StationMap.name)
+                            },
+                            onNavigateToLicenses = {
+                                navController.navigate(Screen.Licenses.name)
+                            },
+                            modifier = Modifier.padding(pagePadding),
+                            bottomContentPadding = scrollBehindNavigationPadding
+                        )
+                    }
 
-                        composable(route = Screen.History.name) {
-                            HistoryScreen(
-                                onCardSelected = { cardIdm ->
-                                    selectedCardIdm = cardIdm
-                                    navController.navigate(Screen.TransactionList.name)
-                                },
-                                modifier = Modifier.padding(pagePadding),
-                                refreshKey = currentScreen == Screen.History,
-                                bottomContentPadding = scrollBehindNavigationPadding
-                            )
-                        }
+                    composable(route = Screen.History.name) {
+                        HistoryScreen(
+                            onCardSelected = { cardIdm ->
+                                selectedCardIdm = cardIdm
+                                navController.navigate(Screen.TransactionList.name)
+                            },
+                            modifier = Modifier.padding(pagePadding),
+                            refreshKey = currentScreen == Screen.History,
+                            bottomContentPadding = scrollBehindNavigationPadding
+                        )
+                    }
 
-                        composable(route = Screen.TransactionList.name) {
-                            selectedCardIdm?.let { cardIdm ->
-                                TransactionListScreen(
-                                    cardIdm = cardIdm,
-                                    onBack = {
-                                        navController.navigateUp()
-                                    },
-                                    paddingValues = paddingValues
+                    composable(route = Screen.TransactionList.name) {
+                        selectedCardIdm?.let { cardIdm ->
+                            TransactionListScreen(
+                                cardIdm = cardIdm,
+                                onBack = { navController.navigateUp() },
+                                paddingValues = PaddingValues(
+                                    start = paddingValues.calculateStartPadding(layoutDirection),
+                                    top = paddingValues.calculateTopPadding(),
+                                    end = paddingValues.calculateEndPadding(layoutDirection),
+                                    bottom = scrollBehindNavigationPadding
                                 )
-                            }
-                        }
-
-                        composable(route = Screen.StationMap.name) {
-                            StationMapScreen(
-                                onBack = {
-                                    navController.navigateUp()
-                                },
-                                modifier = Modifier.padding(pagePadding)
-                            )
-                        }
-
-                        composable(route = Screen.Licenses.name) {
-                            OpenSourceLicensesScreen(
-                                onBack = {
-                                    navController.navigateUp()
-                                },
-                                modifier = Modifier.padding(pagePadding),
-                                paddingValues = paddingValues
                             )
                         }
                     }
+
+                    composable(route = Screen.StationMap.name) {
+                        StationMapScreen(
+                            onBack = { navController.navigateUp() },
+                            modifier = Modifier.padding(pagePadding)
+                        )
+                    }
+
+                    composable(route = Screen.Licenses.name) {
+                        OpenSourceLicensesScreen(
+                            onBack = { navController.navigateUp() },
+                            modifier = Modifier.padding(pagePadding),
+                            paddingValues = PaddingValues(bottom = scrollBehindNavigationPadding)
+                        )
+                    }
                 }
-                ModernNavigationBar(
-                    currentScreen = currentScreen,
-                    navController = navController,
-                    backdrop = backdrop,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
             }
+
+            ModernNavigationBar(
+                currentScreen = currentScreen,
+                navController = navController,
+                backdrop = backdrop,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
+    }
 }
 
 @Composable
@@ -254,25 +257,29 @@ private fun ModernNavigationBar(
         Screen.History, Screen.TransactionList -> 2
         else -> 3
     }
-    val shape = RoundedCornerShape(31.dp)
+    val shape = RoundedCornerShape(42.dp)
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val edgeColor = if (dark) Color.White.copy(alpha = 0.34f) else Color.White.copy(alpha = 0.76f)
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
+            .padding(horizontal = 14.dp, bottom = 14.dp)
     ) {
-        val itemWidth = (maxWidth - 8.dp) / 4
+        // v0.0.40's visible bar is 76dp high. Keep its tab widths and spacing;
+        // the selection capsule spans the entire tab slot so localized labels fit.
+        val itemWidth = (maxWidth - 12.dp) / 4
         val selectedOffset by animateDpAsState(
-            targetValue = 4.dp + itemWidth * selectedIndex,
+            targetValue = 6.dp + itemWidth * selectedIndex,
             animationSpec = spring(dampingRatio = 0.6f),
             label = "navigation_selection_offset"
         )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(62.dp)
+                .height(76.dp)
                 .drawBackdrop(
                     backdrop = backdrop,
                     shape = { shape },
@@ -281,75 +288,74 @@ private fun ModernNavigationBar(
                         blur(8.dp.toPx())
                         lens(12.dp.toPx(), 24.dp.toPx())
                     },
-                    onDrawSurface = {
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    Color.White.copy(alpha = if (dark) 0.24f else 0.42f),
-                                    Color.White.copy(alpha = if (dark) 0.08f else 0.14f)
-                                )
-                            )
-                        )
-                    }
+                    onDrawSurface = {}
                 )
-                .border(1.dp, edgeColor, shape)
+                .navigationGlassSurface(shape)
+                .navigationGlassHighlight(shape)
         ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = selectedOffset)
-                .width(itemWidth)
-                .height(50.dp)
-                .drawBackdrop(
-                    backdrop = backdrop,
-                    shape = { RoundedCornerShape(26.dp) },
-                    effects = {
-                        vibrancy()
-                        blur(8.dp.toPx())
-                        lens(12.dp.toPx(), 24.dp.toPx())
-                    },
-                    onDrawSurface = {
-                        drawRect(Color.White.copy(alpha = if (dark) 0.22f else 0.50f))
-                    }
+            val capsuleShape = RoundedCornerShape(40.dp)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = selectedOffset, y = 5.dp)
+                    .width(itemWidth)
+                    .height(66.dp)
+                    .shadow(
+                        elevation = 2.dp,
+                        shape = capsuleShape,
+                        ambientColor = Color.Black.copy(alpha = if (dark) 0.10f else 0.05f),
+                        spotColor = Color.Black.copy(alpha = if (dark) 0.12f else 0.07f)
+                    )
+                    .drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { capsuleShape },
+                        effects = {
+                            vibrancy()
+                            blur(8.dp.toPx())
+                            lens(12.dp.toPx(), 24.dp.toPx())
+                        },
+                        onDrawSurface = {
+                            drawRect(Color.White.copy(alpha = if (dark) 0.22f else 0.50f))
+                        }
+                    )
+                    .border(1.dp, edgeColor.copy(alpha = 0.65f), capsuleShape)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp).height(66.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GlassNavigationItem(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(Res.string.fare),
+                    selected = currentScreen == Screen.Calculator,
+                    icon = { CalculatorIcon() },
+                    onClick = { navigateToScreen(navController, Screen.Calculator) }
                 )
-                .border(1.dp, edgeColor.copy(alpha = 0.65f), RoundedCornerShape(26.dp))
-        )
-        Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            GlassNavigationItem(
-                modifier = Modifier.weight(1f),
-                title = stringResource(Res.string.fare),
-                selected = currentScreen == Screen.Calculator,
-                icon = { CalculatorIcon() },
-                onClick = { navigateToScreen(navController, Screen.Calculator) }
-            )
-            GlassNavigationItem(
-                modifier = Modifier.weight(1f),
-                title = stringResource(Res.string.balance),
-                selected = currentScreen == Screen.Home,
-                icon = { CardIcon() },
-                onClick = { navigateToScreen(navController, Screen.Home) }
-            )
-            GlassNavigationItem(
-                modifier = Modifier.weight(1f),
-                title = stringResource(Res.string.historyTab),
-                selected = currentScreen == Screen.History || currentScreen == Screen.TransactionList,
-                icon = { HistoryIcon() },
-                onClick = { navigateToScreen(navController, Screen.History) }
-            )
-            GlassNavigationItem(
-                modifier = Modifier.weight(1f),
-                title = stringResource(Res.string.more),
-                selected = currentScreen == Screen.More ||
-                    currentScreen == Screen.StationMap ||
-                    currentScreen == Screen.Licenses,
-                icon = { AppsIcon() },
-                onClick = { navigateToScreen(navController, Screen.More) }
-            )
-        }
+                GlassNavigationItem(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(Res.string.balance),
+                    selected = currentScreen == Screen.Home,
+                    icon = { CardIcon() },
+                    onClick = { navigateToScreen(navController, Screen.Home) }
+                )
+                GlassNavigationItem(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(Res.string.historyTab),
+                    selected = currentScreen == Screen.History || currentScreen == Screen.TransactionList,
+                    icon = { HistoryIcon() },
+                    onClick = { navigateToScreen(navController, Screen.History) }
+                )
+                GlassNavigationItem(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(Res.string.more),
+                    selected = currentScreen == Screen.More ||
+                        currentScreen == Screen.StationMap ||
+                        currentScreen == Screen.Licenses,
+                    icon = { AppsIcon() },
+                    onClick = { navigateToScreen(navController, Screen.More) }
+                )
+            }
         }
     }
 }
@@ -363,7 +369,7 @@ private fun GlassNavigationItem(
     onClick: () -> Unit
 ) {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val selectedColor = if (dark) Color(0xFFEF5350) else Color(0xFFD32F2F)
+    val selectedColor = Color(0xFFD32F3F)
     val iconColor = if (selected) selectedColor else if (dark) MaterialTheme.colorScheme.onSurface else Color(0xFF17191B)
     val iconScale by animateFloatAsState(
         targetValue = if (selected) 1.08f else 1f,
