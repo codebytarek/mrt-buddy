@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.41
+
+- Softened the Balance card shadow in light and dark themes to reduce the box-like appearance around the balance display.
+
 ## v0.0.40
 
 - Standardized low-balance warnings to use the app's fixed theme-aware red across Balance, History, and Fare.
