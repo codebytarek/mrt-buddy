@@ -115,7 +115,6 @@ import net.adhikary.mrtbuddy.ui.theme.DarkMRTPass
 import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
-import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.ui.theme.glassSurface
 import net.adhikary.mrtbuddy.ui.theme.balanceGlassSurface
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
@@ -370,10 +369,9 @@ private fun ModernBalanceContent(
         val isCriticalBalance = amount in 1..17
         val isEmptyBalance = amount <= 0
         val showBalanceWarning = isLowBalance || isCriticalBalance || isEmptyBalance
-        val warningColor = if (isLowBalance) lowBalanceOrange else MaterialTheme.colorScheme.error
+        val warningColor = MaterialTheme.colorScheme.error
         val balanceColor = when {
-            isLowBalance -> lowBalanceOrange
-            isCriticalBalance || isEmptyBalance -> MaterialTheme.colorScheme.error
+            isLowBalance || isCriticalBalance || isEmptyBalance -> MaterialTheme.colorScheme.error
             else -> MaterialTheme.colorScheme.primary
         }
 

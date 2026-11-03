@@ -137,17 +137,17 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
     val fill = Brush.verticalGradient(
         colorStops = if (dark) {
             arrayOf(
-                0f to colors.surfaceContainerHigh.copy(alpha = 0.78f),
-                0.18f to colors.surfaceContainer.copy(alpha = 0.72f),
-                0.72f to colors.surfaceContainerLow.copy(alpha = 0.70f),
-                1f to colors.surfaceContainerHigh.copy(alpha = 0.78f)
+                0f to colors.surfaceBright,
+                0.18f to colors.surfaceContainerHigh,
+                0.72f to colors.surfaceContainer,
+                1f to colors.surfaceBright
             )
         } else {
             arrayOf(
-                0f to colors.surfaceContainerLow.copy(alpha = 0.78f),
-                0.18f to colors.surface.copy(alpha = 0.72f),
-                0.72f to colors.surfaceContainer.copy(alpha = 0.72f),
-                1f to colors.surfaceContainerHigh.copy(alpha = 0.80f)
+                0f to Color.White,
+                0.18f to colors.surfaceContainerHighest,
+                0.72f to colors.surfaceBright,
+                1f to Color.White
             )
         }
     )
@@ -164,9 +164,9 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
             drawRect(
                 brush = Brush.horizontalGradient(
                     listOf(
-                        colors.primary.copy(alpha = if (dark) 0.035f else 0.06f),
+                        colors.primary.copy(alpha = if (dark) 0.035f else 0.025f),
                         Color.Transparent,
-                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.07f)
+                        colors.tertiary.copy(alpha = if (dark) 0.045f else 0.025f)
                     )
                 ),
                 size = Size(size.width, size.height)

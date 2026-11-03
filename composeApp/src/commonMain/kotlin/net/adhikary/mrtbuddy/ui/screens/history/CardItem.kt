@@ -94,7 +94,6 @@ import net.adhikary.mrtbuddy.ui.theme.DarkRapidPass
 import net.adhikary.mrtbuddy.ui.theme.LightMRTPass
 import net.adhikary.mrtbuddy.ui.theme.LightRapidPass
 import net.adhikary.mrtbuddy.ui.theme.Transparent
-import net.adhikary.mrtbuddy.ui.theme.lowBalanceOrange
 import net.adhikary.mrtbuddy.utils.TimeUtils
 import net.adhikary.mrtbuddy.utils.isRapidPassIdm
 import org.jetbrains.compose.resources.stringResource
@@ -357,8 +356,7 @@ fun CardItem(
                                         fontFamily = FontFamily.Monospace
                                     ),
                                     color = when {
-                                        isCriticalBalance || isEmptyBalance -> MaterialTheme.colorScheme.error
-                                        isLowBalance -> lowBalanceOrange
+                                        isCriticalBalance || isEmptyBalance || isLowBalance -> MaterialTheme.colorScheme.error
                                         else -> Color.White
                                     }
                                 )
@@ -369,11 +367,7 @@ fun CardItem(
                                             .offset(y = (-2).dp)
                                             .background(Color.Transparent),
                                         shape = RoundedCornerShape(4.dp),
-                                        color = if (isCriticalBalance || isEmptyBalance) {
-                                            MaterialTheme.colorScheme.error
-                                        } else {
-                                            lowBalanceOrange
-                                        }
+                                        color = MaterialTheme.colorScheme.error
                                     ) {
                                         Text(
                                             text = stringResource(

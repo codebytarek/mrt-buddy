@@ -10,7 +10,6 @@ val LightRapidPass = Color(0xFF2196F3)  // Blue color for Rapid Pass
 val LightMRTPass = Color(0xFF408E2D)  // Green color for MRT Pass
 val LightPositiveGreen = Color(0xFF4CAF50)
 val LightNegativeRed = Color(0xFFD32F2F)
-val lowBalanceOrange = Color(0xFFF97316)
 val Alert_yellow_L = Color(0xFFFFBF00)
 
 // Light Theme Material Colors
@@ -26,7 +25,7 @@ val tertiaryLight = Color(0xFF586249)
 val onTertiaryLight = Color(0xFFFFFFFF)
 val tertiaryContainerLight = Color(0xFF418E2C)
 val onTertiaryContainerLight = Color(0xFFFFFFFF)
-val errorLight = Color(0xFFB00020)
+val errorLight = LightNegativeRed
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF410002)
@@ -70,7 +69,7 @@ val tertiaryDark = Color(0xFF4CAF50)
 val onTertiaryDark = Color(0xFFFFFFFF)
 val tertiaryContainerDark = Color(0xFF4CAF50)
 val onTertiaryContainerDark = Color(0xFFFFFFFF)
-val errorDark = Color(0xFFCF6679)
+val errorDark = DarkNegativeRed
 val onErrorDark = Color(0xFF000000)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)

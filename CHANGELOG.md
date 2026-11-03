@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.0.40
+
+- Standardized low-balance warnings to use the app's fixed theme-aware red across Balance, History, and Fare.
+- Brightened the Balance card with a more opaque frosted-glass surface in light and dark themes.
+
 ## v0.0.39
 
 - Use Android Monet colors for the app backdrop and frosted glass surfaces, including the scanned balance card.

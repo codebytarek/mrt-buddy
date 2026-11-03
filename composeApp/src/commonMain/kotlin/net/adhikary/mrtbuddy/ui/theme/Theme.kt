@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.luminance
 
 val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -88,7 +89,8 @@ fun glassColorScheme(base: androidx.compose.material3.ColorScheme): androidx.com
         primary = base.primary.copy(alpha = 0.94f),
         secondary = base.secondary.copy(alpha = 0.92f),
         tertiary = base.tertiary.copy(alpha = 0.92f),
-        error = base.error.copy(alpha = 0.94f),
+        // Keep warnings and spending deficits on the same fixed red across Monet palettes.
+        error = if (base.surface.luminance() < 0.5f) DarkNegativeRed else LightNegativeRed,
         surface = base.surface,
         surfaceVariant = base.surfaceVariant,
         surfaceContainerLowest = base.surfaceContainerLowest,
