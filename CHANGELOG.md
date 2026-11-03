@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.43
+
+- Disabled Balance card elevation for every interaction state and softened its lower surface edge to remove the remaining shadow-like halo.
+
 ## v0.0.42
 
 - Removed the Balance card's explicit drop shadow while preserving its frosted surface, shape, and outline.

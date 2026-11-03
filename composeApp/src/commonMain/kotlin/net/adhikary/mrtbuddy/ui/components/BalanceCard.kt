@@ -139,7 +139,14 @@ fun BalanceCard(
             .wrapContentHeight()
             .scale(animatedScale)
             .balanceGlassSurface(RoundedCornerShape(28.dp)),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 0.dp,
+            draggedElevation = 0.dp,
+            disabledElevation = 0.dp
+        ),
         shape = RoundedCornerShape(28.dp), // More rounded corners
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
