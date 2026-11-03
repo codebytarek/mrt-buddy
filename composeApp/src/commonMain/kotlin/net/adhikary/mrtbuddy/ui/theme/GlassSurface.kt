@@ -152,12 +152,6 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
         }
     )
     this
-        .shadow(
-            elevation = if (dark) 4.dp else 3.dp,
-            shape = shape,
-            ambientColor = Color.Black.copy(alpha = if (dark) 0.08f else 0.03f),
-            spotColor = Color.Black.copy(alpha = if (dark) 0.10f else 0.04f)
-        )
         .clip(shape)
         .background(fill, shape)
         .drawBehind {

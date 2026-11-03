@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.42
+
+- Removed the Balance card's explicit drop shadow while preserving its frosted surface, shape, and outline.
+
 ## v0.0.41
 
 - Softened the Balance card shadow in light and dark themes to reduce the box-like appearance around the balance display.
