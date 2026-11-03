@@ -130,8 +130,71 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
         )
 }
 
-/** Clips Balance content to its card shape without drawing an inset panel, halo, or shadow. */
-fun Modifier.balanceGlassSurface(shape: Shape): Modifier = clip(shape)
+/** Frosted balance surface using the navigation glass treatment without its drop shadow. */
+fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
+    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val base = MaterialTheme.colorScheme.surface
+    val fill = if (dark) {
+        Brush.verticalGradient(
+            colorStops = arrayOf(
+                0f to Color.White.copy(alpha = 0.24f),
+                0.08f to base.copy(alpha = 0.84f),
+                0.48f to base.copy(alpha = 0.76f),
+                1f to base.copy(alpha = 0.90f)
+            )
+        )
+    } else {
+        Brush.verticalGradient(
+            colorStops = arrayOf(
+                0f to Color.White.copy(alpha = 0.80f),
+                0.10f to Color.White.copy(alpha = 0.62f),
+                0.56f to Color.White.copy(alpha = 0.52f),
+                1f to Color.White.copy(alpha = 0.68f)
+            )
+        )
+    }
+
+    this
+        .clip(shape)
+        .background(fill, shape)
+        .drawBehind {
+            // Keep the soft upper reflection and side sheen from the nav bar, but omit its
+            // dark lower fade so the balance display does not read as a shadowed box.
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to Color.White.copy(alpha = if (dark) 0.30f else 0.44f),
+                        0.12f to Color.White.copy(alpha = if (dark) 0.12f else 0.20f),
+                        0.42f to Color.Transparent,
+                        1f to Color.Transparent
+                    )
+                ),
+                size = Size(size.width, size.height)
+            )
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        Color.White.copy(alpha = if (dark) 0.10f else 0.22f),
+                        Color.Transparent,
+                        Color.Transparent,
+                        Color.White.copy(alpha = if (dark) 0.07f else 0.16f)
+                    )
+                ),
+                size = Size(size.width, size.height)
+            )
+        }
+        .border(
+            width = 1.dp,
+            brush = Brush.verticalGradient(
+                listOf(
+                    Color.White.copy(alpha = if (dark) 0.76f else 0.94f),
+                    Color.White.copy(alpha = if (dark) 0.38f else 0.54f),
+                    Color.White.copy(alpha = if (dark) 0.22f else 0.42f)
+                )
+            ),
+            shape = shape
+        )
+}
 
 /** Opaque frosted-glass treatment for controls and dialogs whose contents must stay easy to read. */
 fun Modifier.frostedGlassSurface(shape: Shape): Modifier = composed {

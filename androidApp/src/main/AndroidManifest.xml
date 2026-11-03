@@ -15,7 +15,8 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="MRT Buddy"
         android:name=".MRTApp"
         android:supportsRtl="true"
         android:theme="@style/MRTBuddyTheme"
@@ -31,7 +32,7 @@
         <activity
             android:exported="true"
             android:name=".MainActivity"
-            android:label="@string/app_name"
+            android:label="MRT Buddy"
             android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

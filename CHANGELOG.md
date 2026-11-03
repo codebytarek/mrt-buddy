@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.45
+
+- Restored the Balance card's frosted Liquid Glass surface to match the bottom navigation, without an external shadow or lower shadow fade.
+- Set the Android package and launcher labels explicitly to MRT Buddy and declared the round launcher icon for consistent install and app info metadata.
+- Kept the green round train launcher artwork shown in the app icon reference.
+
 ## v0.0.44
 
 - Removed the Balance display's gradient, tint, and outline layers that created an inset panel effect.
