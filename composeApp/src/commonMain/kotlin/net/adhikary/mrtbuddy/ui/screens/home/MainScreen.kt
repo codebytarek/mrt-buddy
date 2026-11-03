@@ -265,7 +265,8 @@ private fun ModernNavigationBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 14.dp, bottom = 14.dp)
+            .padding(horizontal = 14.dp)
+            .padding(bottom = 14.dp)
     ) {
         // v0.0.40's visible bar is 76dp high. Keep its tab widths and spacing;
         // the selection capsule spans the entire tab slot so localized labels fit.
