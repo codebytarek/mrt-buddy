@@ -1,4 +1,9 @@
 # Changelog
+## v0.0.50
+
+- Removed the live backdrop shader from the large Balance card to address a possible rendering crash on affected devices.
+- Kept the Balance card's opaque frosted appearance, shape, header colors, and shadow-free edges. The floating navigation retains its live blur.
+
 ## v0.0.49
 
 - Applied the shared live backdrop blur and lens effect to the Balance card, with a near-opaque frosted finish so recent activity does not show through it.

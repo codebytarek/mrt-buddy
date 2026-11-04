@@ -66,7 +66,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kyant.backdrop.Backdrop
 import mrtbuddy.composeapp.generated.resources.Res
 import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningText
 import mrtbuddy.composeapp.generated.resources.deviceCompatibilityWarningTitle
@@ -126,7 +125,6 @@ fun BalanceCard(
     cardState: CardState,
     cardIdm: String? = null,
     cardName: String? = null,
-    backdrop: Backdrop,
     modifier: Modifier = Modifier
 ) {
     val animatedScale by animateFloatAsState(
@@ -140,7 +138,7 @@ fun BalanceCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .scale(animatedScale)
-            .balanceGlassSurface(RoundedCornerShape(28.dp), backdrop),
+            .balanceGlassSurface(RoundedCornerShape(28.dp)),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(28.dp), // More rounded corners
         colors = CardDefaults.cardColors(

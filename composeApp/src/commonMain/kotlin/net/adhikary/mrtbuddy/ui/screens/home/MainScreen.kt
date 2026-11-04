@@ -165,8 +165,7 @@ fun MainScreen(
                             uiState = uiState,
                             hasTransactions = hasTransactions,
                             paddingValues = pagePadding,
-                            bottomContentPadding = scrollBehindNavigationPadding,
-                            backdrop = backdrop
+                            bottomContentPadding = scrollBehindNavigationPadding
                         )
                     }
 
@@ -426,7 +425,6 @@ private fun ModernHomeScreen(
     hasTransactions: Boolean,
     paddingValues: PaddingValues,
     bottomContentPadding: androidx.compose.ui.unit.Dp,
-    backdrop: Backdrop,
 
 ) {
     val validTransactions = remember(uiState.transactionWithAmount) {
@@ -500,7 +498,6 @@ private fun ModernHomeScreen(
             cardState = uiState.cardState,
             cardName = uiState.cardName,
             cardIdm = uiState.cardIdm,
-            backdrop = backdrop,
             modifier = Modifier.fillMaxWidth().zIndex(1f)
         )
 
