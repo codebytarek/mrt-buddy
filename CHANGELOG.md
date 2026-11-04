@@ -1,4 +1,9 @@
 # Changelog
+## v0.0.49
+
+- Applied the shared live backdrop blur and lens effect to the Balance card, with a near-opaque frosted finish so recent activity does not show through it.
+- Preserved the Balance card's current shape, existing card header colors, and shadow-free edge treatment.
+
 ## v0.0.48
 
 - Matched the bottom navigation selection animation to the HTML preview with a smoother 450 ms eased transition and a single soft overshoot.

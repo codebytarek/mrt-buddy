@@ -15,6 +15,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
 
 /** Higher-contrast, layered glass treatment for the floating bottom navigation. */
 fun Modifier.navigationGlassSurface(shape: Shape): Modifier = composed {
@@ -130,36 +135,46 @@ fun Modifier.glassSurface(shape: Shape, bottomEdgeAlpha: Float? = null): Modifie
         )
 }
 
-/** Frosted balance display: keeps the existing card shape while using visible Monet surfaces. */
-fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
+/** Near-opaque frosted balance display: blurs content behind it without showing readable rows through. */
+fun Modifier.balanceGlassSurface(shape: Shape, backdrop: Backdrop): Modifier = composed {
     val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val colors = MaterialTheme.colorScheme
     val fill = Brush.verticalGradient(
         colorStops = if (dark) {
             arrayOf(
-                0f to Color.White.copy(alpha = 0.24f),
-                0.08f to colors.surface.copy(alpha = 0.88f),
-                0.48f to colors.surface.copy(alpha = 0.82f),
-                1f to colors.surface.copy(alpha = 0.92f)
+                0f to colors.surfaceContainerHigh.copy(alpha = 0.93f),
+                0.10f to colors.surface.copy(alpha = 0.92f),
+                0.56f to colors.surface.copy(alpha = 0.90f),
+                1f to colors.surfaceContainerHigh.copy(alpha = 0.94f)
             )
         } else {
             arrayOf(
-                0f to Color.White.copy(alpha = 0.96f),
-                0.10f to Color.White.copy(alpha = 0.93f),
-                0.56f to Color.White.copy(alpha = 0.88f),
-                1f to Color.White.copy(alpha = 0.94f)
+                0f to Color.White.copy(alpha = 0.95f),
+                0.10f to colors.surfaceContainerLow.copy(alpha = 0.94f),
+                0.56f to colors.surface.copy(alpha = 0.92f),
+                1f to colors.surfaceContainerLow.copy(alpha = 0.95f)
             )
         }
     )
     this
+        .drawBackdrop(
+            backdrop = backdrop,
+            shape = { shape },
+            effects = {
+                vibrancy()
+                blur(16.dp.toPx())
+                lens(12.dp.toPx(), 24.dp.toPx())
+            },
+            onDrawSurface = {}
+        )
         .clip(shape)
         .background(fill, shape)
         .drawBehind {
             drawRect(
                 brush = Brush.verticalGradient(
                     listOf(
-                        Color.White.copy(alpha = if (dark) 0.18f else 0.34f),
-                        Color.White.copy(alpha = if (dark) 0.06f else 0.10f),
+                        Color.White.copy(alpha = if (dark) 0.12f else 0.18f),
+                        Color.White.copy(alpha = if (dark) 0.04f else 0.06f),
                         Color.Transparent,
                         Color.Transparent
                     )
@@ -171,14 +186,13 @@ fun Modifier.balanceGlassSurface(shape: Shape): Modifier = composed {
             width = 1.dp,
             brush = Brush.verticalGradient(
                 listOf(
-                    Color.White.copy(alpha = if (dark) 0.68f else 0.90f),
-                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.38f),
+                    Color.White.copy(alpha = if (dark) 0.36f else 0.72f),
+                    colors.outlineVariant.copy(alpha = if (dark) 0.40f else 0.42f),
                     colors.outlineVariant.copy(alpha = if (dark) 0.34f else 0.42f)
                 )
             ),
             shape = shape
         )
-        .navigationGlassHighlight(shape)
 }
 
 /** Opaque frosted-glass treatment for controls and dialogs whose contents must stay easy to read. */
