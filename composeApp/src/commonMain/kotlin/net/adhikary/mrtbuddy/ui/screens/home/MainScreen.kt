@@ -258,8 +258,6 @@ private fun ModernNavigationBar(
         else -> 3
     }
     val shape = RoundedCornerShape(42.dp)
-    val dark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val edgeColor = if (dark) Color.White.copy(alpha = 0.34f) else Color.White.copy(alpha = 0.76f)
 
     BoxWithConstraints(
         modifier = modifier
@@ -299,19 +297,13 @@ private fun ModernNavigationBar(
                 .navigationGlassSurface(shape)
                 .navigationGlassHighlight(shape)
         ) {
-            val capsuleShape = RoundedCornerShape(40.dp)
+            val capsuleShape = RoundedCornerShape(percent = 50)
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .offset(x = selectedOffset, y = 5.dp)
                     .width(itemWidth)
                     .height(66.dp)
-                    .shadow(
-                        elevation = 2.dp,
-                        shape = capsuleShape,
-                        ambientColor = Color.Black.copy(alpha = if (dark) 0.10f else 0.05f),
-                        spotColor = Color.Black.copy(alpha = if (dark) 0.12f else 0.07f)
-                    )
                     .drawBackdrop(
                         backdrop = backdrop,
                         shape = { capsuleShape },
@@ -321,10 +313,16 @@ private fun ModernNavigationBar(
                             lens(12.dp.toPx(), 24.dp.toPx())
                         },
                         onDrawSurface = {
-                            drawRect(Color.White.copy(alpha = if (dark) 0.22f else 0.50f))
+                            drawRect(Color(0x1A000000))
                         }
                     )
-                    .border(1.dp, edgeColor.copy(alpha = 0.65f), capsuleShape)
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            listOf(Color(0xE6FFFFFF), Color(0x33FFFFFF))
+                        ),
+                        shape = capsuleShape
+                    )
             )
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 5.dp).height(66.dp),

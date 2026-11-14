@@ -1,4 +1,9 @@
 # Changelog
+## v0.0.51
+
+- Restyled the selected bottom navigation capsule with a neutral black glass fill and a subtle vertical white outline, keeping the existing glass blur, sizing, and slide animation.
+- Updated the Android Gradle Plugin to 9.5.1.
+
 ## v0.0.50
 
 - Removed the live backdrop shader from the large Balance card to address a possible rendering crash on affected devices.
