@@ -1,4 +1,8 @@
 # Changelog
+## v0.0.52
+
+- Reduced the selected bottom navigation capsule's neutral black fill to 8% opacity while preserving its outline, shape, blur, and animation.
+
 ## v0.0.51
 
 - Restyled the selected bottom navigation capsule with a neutral black glass fill and a subtle vertical white outline, keeping the existing glass blur, sizing, and slide animation.

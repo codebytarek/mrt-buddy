@@ -313,7 +313,7 @@ private fun ModernNavigationBar(
                             lens(12.dp.toPx(), 24.dp.toPx())
                         },
                         onDrawSurface = {
-                            drawRect(Color(0x1A000000))
+                            drawRect(Color(0x14000000))
                         }
                     )
                     .border(
